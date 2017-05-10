@@ -1,0 +1,6 @@
+name = Dragoon URLs
+description = Creates settings, blocks and static functions to get the url for Dragoon access.
+core = 7.x 
+package = LMS pages
+version = "7.x-0.1"
+core = "7.x"

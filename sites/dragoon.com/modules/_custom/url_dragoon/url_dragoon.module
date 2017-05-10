@@ -1,0 +1,78 @@
+<?php
+
+function url_dragoon_menu(){
+	$items = array();
+
+	$items['admin/config/search/dragoonURL'] = array(
+		'title' => t('URL access for Dragoon'),
+		'description' => 'Page to set the custom string of the Dragoon URL',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('url_dragoon_admin_page'),
+		'access arguments' => array('administer url_dragoon settings'),
+		'type' => MENU_NORMAL_ITEM,
+	);
+
+	return $items;
+}
+
+function url_dragoon_block_info(){
+	$blocks = array();
+	$blocks['URL_Inputs'] = array(
+		'info' => 'Block with hidden input variables for url to Dragoon'
+	);
+
+	return $blocks;
+}
+
+function url_dragoon_block_view($delta = ''){
+	$block = array();
+	switch($delta){
+		case 'URL_Inputs':
+			$block['content'] = array(
+				'#markup' => create_html(),
+			);
+			break;
+	}
+
+	return $block;
+
+}
+
+function create_html(){
+	$input_html = "<input type = 'hidden' id = '%s' value = '%s'></input>";
+	$path = get_path();
+
+	return sprintf($input_html, 'dragoon_url', $path['url']."/")."<br/>".
+		sprintf($input_html, 'dragoon_path', $path['path'])."<br/>".
+		sprintf($input_html, 'server_url', $path['serverURL']);
+
+}
+
+function url_dragoon_admin_page(){
+	$form = array();
+
+	$form['url_dragoon_path'] = array(
+		'#type' => 'textfield',
+		'#title' => 'Path to access Dragoon',
+		'#description' => t('Do not include the starting and trailing back-slash'),
+		'#default_value' => variable_get('url_dragoon_path'),
+		'#size' => 50,
+	);
+
+	return system_settings_form($form);
+}
+
+function get_path(){
+	$url_path = &drupal_static(__FUNCTION__);
+	if(!isset($url_path)){
+		$path = variable_get('url_dragoon_path');
+		$protocol = (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on'?"https":"http")."://";
+		$url_path = array(
+			"url" => $protocol.$_SERVER['SERVER_NAME'].($path != "" ? ("/".$path) : ""),
+			"path" => $path,
+			"serverURL" => $protocol.$_SERVER['SERVER_NAME'] 
+		);
+	}
+
+	return $url_path;
+}

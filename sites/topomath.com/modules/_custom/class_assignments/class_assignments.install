@@ -1,0 +1,82 @@
+<?php
+
+function class_assignments_schema(){
+	$schema = array();
+
+	$schema['assignments'] = array(
+		'description' => 'Table to match assignment IDs to class IDs and keep problem details',
+		'fields' => array(
+			'assignment_name' => array(
+				'description' => 'Assignment name given by the teacher',
+				'type' => 'varchar',
+				'length' => 50,
+				'default' => '',
+			),
+			'assignment_id' => array(
+				'description' => 'random character string for the assignment ID',
+                'type' => 'varchar',
+                'length' => 12,
+                'not null' => TRUE,
+                'default' => '',
+			),
+			'class_code' => array(
+				'description' => 'random character class code for the class in which the assignment is given',
+                'type' => 'varchar',
+                'length' => 6,
+                'not null' => TRUE,
+                'default' => '',
+			),
+			'problem' => array(
+				'description' => 'problem which student is given',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => TRUE,
+				'default' => '',
+			),
+			'problem_properties' => array(
+				'description' => 'json of all the problem properties',
+				'type' => 'text',
+				'size' => 'normal',
+				'not null' => TRUE,
+			),
+			'time' => array(
+				'description' => 'time stamp when the assignment was given',
+				'type' => 'datetime',
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+			),
+		),
+		'primary key' => array('assignment_id'),
+		'foreign key' => array(
+			'class_constraint' => array(
+                'table' => 'classes',
+                'columns' => array('class_code' => 'code'),
+            ),
+		),
+		'unique keys' => array(
+			'class_assignemnt' => array('assignment_id', 'class_code')
+		),
+	);
+
+	return $schema;
+}
+
+function class_assignments_install(){
+	db_query('
+        ALTER TABLE {assignments}
+        ADD CONSTRAINT {class_constraint}
+        FOREIGN KEY (class_code) REFERENCES {classes} (code)
+    ');
+	db_query('
+        ALTER TABLE {assignments}
+        MODIFY time TIMESTAMP NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP'
+    );
+}
+
+function class_assignment_uninstall(){
+	db_query('
+		DROP TABLE assignments;
+	');
+}

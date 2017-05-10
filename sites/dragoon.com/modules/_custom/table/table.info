@@ -1,0 +1,6 @@
+name = Table View
+description = Converts an array to html structure which looks like a table.
+core = 7.x 
+package = Views
+version = "7.x-0.1"
+core = "7.x"

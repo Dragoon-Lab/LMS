@@ -1,0 +1,14 @@
+name = Bootstrap Site Alert
+description = This module is for rendering alerts site wide using the power of Bootstrap
+package = Other
+core = 7.x
+dependencies[] = ctools
+
+configure = admin/config/system/bootstrap-site-alert
+
+; Information added by Drupal.org packaging script on 2016-03-10
+version = "7.x-1.1"
+core = "7.x"
+project = "bootstrap_site_alert"
+datestamp = "1457618057"
+

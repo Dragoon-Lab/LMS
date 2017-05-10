@@ -1,0 +1,7 @@
+name = Non Class Models Loader
+description = loads the non class models content along with a view
+core = 7.x
+package = Model Blocks
+version = "7.x-0.1"
+core = "7.x"
+dependencies[] = url_dragoon

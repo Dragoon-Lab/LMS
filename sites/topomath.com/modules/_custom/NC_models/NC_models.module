@@ -1,0 +1,300 @@
+<?php
+	function loadNCModels($user_name, $action){
+		//prepare content as json
+		//preparing private content
+		//private content consists of folders which are unshared and models which are private
+		//unshared folders exist in lms db, we need to pull out these folders
+		//private unshared folders
+
+		$query = db_select('folders','f');
+		$query->fields('f',array('folder_id','folder_name'));
+		$query->condition('owner',$user_name);
+		$query->condition('current_status',0);
+		//$query = "select folder_id,folder_name from folders where owner='$user_name' and !current_status";
+		//return $query;
+		$result = $query->execute();
+		$string = array();
+		while($res=$result->fetchAssoc()){
+			$group = $res['folder_id'];
+			$grp_name = $res['folder_name'];
+			//make a request to the dragoon server to list problems where group = sh_name+"-"+owner_name
+			$ret = sendGroup($group);
+			$ret = json_decode($ret);
+			foreach($ret as $temp)
+			$string["private"][$grp_name][$temp]=$temp;
+		}
+
+		//original private problems
+		$priv_group = $user_name."-private";
+		$ret  = sendGroup($priv_group);
+		$ret = json_decode($ret);
+		foreach($ret as $temp){
+			$string["private"][$temp] = $temp;
+		}
+
+		//shared folders
+		$shared_q= db_select('shared_members','sh');
+		$shared_q->fields('sh',array('folder_id'));
+		$shared_q->condition('member_name',$user_name);
+		if($action)
+			$shared_q->condition('member_relation',1);
+		//$shared_q = "select folder_id from shared_members where member_name='$user_name'".$status_query;
+		$sh_q_res = $shared_q->execute();
+		$local_shared_store = "";
+		while($res_sh = $sh_q_res->fetchAssoc()){
+			$sh_grp = explode("-",$res_sh['folder_id']);
+			$sh_grp_name = $sh_grp[0];
+			$ret = sendGroup($res_sh['folder_id']);
+			$ret = json_decode($ret);
+			foreach($ret as $temp){
+				$string["shared"][$sh_grp_name . " by " . $sh_grp[1]][$temp] = $temp;
+				$local_shared_store = $local_shared_store.$sh_grp_name . " by " . $sh_grp[1]."=".$sh_grp_name."-".$sh_grp[1]."&";
+			}
+		}
+
+
+		//owned folders(which are shared)
+		$query2 = db_select('folders','f');
+		$query2->fields('f',array('folder_id','folder_name'));
+		$query2->condition('owner',$user_name);
+		$query2->condition('current_status',1);
+		//$query = "select folder_id,folder_name from folders where owner='$user_name' and !current_status";
+		//return $query;
+		$result2 = $query2->execute();
+		while($res2=$result2->fetchAssoc()){
+			$group2 = $res2['folder_id'];
+			$grp_name2 = $res2['folder_name'];
+			//make a request to the dragoon server to list problems where group = sh_name+"-"+owner_name
+			$ret2 = sendGroup($group2);
+			$ret2 = json_decode($ret2);
+			foreach($ret2 as $temp2){
+				$string["shared"][$grp_name2][$temp2]=$temp2;
+				$local_shared_store = $local_shared_store.$grp_name2."=".$grp_name2."-".$user_name."&";
+			}
+		}
+		//print_r($string);
+		echo '<input type = "hidden" id = "local_shared_store" value = "'.$local_shared_store.'"\>';
+		return json_encode($string);
+	}
+
+	function sendGroup($g){
+		$url = get_path();
+		$url = $url['url'].'/global.php';
+		$data = array('t' => 'reqNonClassProblems', 'g' => $g);
+
+		$options = array(
+			'http' => array(
+				'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+				'method'  => 'POST',
+				'content' => http_build_query($data)
+			)
+		);
+		$context  = stream_context_create($options);
+		$result = file_get_contents($url, false, $context);
+		if ($result === FALSE) { /* Handle error */
+			echo "something failed";
+		}
+		return $result;
+
+	}
+
+	function createAdditionalBlocks($dataTree){
+
+	   // drupal_add_js(drupal_get_path('module', 'NC_models').'/static/nonClassHandlers.js');
+		$return_add_blocks='<div class="nc_func_but container non-class-buttons">
+								<div class="row">
+									<ul class="col-md-12 col-sm-12">
+										<li><a href="#createFolder" class="btn btn-success btn-md createFolderClass" data-toggle="modal" data-target="#createFolderModal">Create folder</a></li>
+										<li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#deleteFolderModal">Delete items</a></li>
+										<li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#createModelModal">Create model</a></li>
+									   <li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#shareFolderModal">Manage sharing</a></li>
+									   <li><a href="#deleteFolder" class="btn btn-success btn-md modAction" data-toggle="modal" data-target="#moveModelModal">Move Models</a></li>
+									   <li><a href="#deleteFolder" class="btn btn-success btn-md modAction" data-toggle="modal" data-target="#moveModelModal">Copy Models</a></li>
+									   <li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#renameItemsModal">Rename items</a></li>
+									   </ul>
+								</div>
+							</div>
+							<div id="confirmDeleteModal" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Delete</h4>
+											</div>
+										<div class="modal-body">
+											<p>Are you sure you want to delete?</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="deleteConfirm">Yes! Delete</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal" href="#deleteFolderModal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="confirmRemoveShare" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Delete</h4>
+											</div>
+										<div class="modal-body">
+											<p>Are you sure you want to delete?</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="removeShareConfirmed">Yes! Delete</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="confirmModelCopy" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Copy/Move</h4>
+											</div>
+										<div class="modal-body">
+											<p>Are you sure you want to copy/move?</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="copyModelConfirmed">Yes</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div> 
+							<div id="alertDisabledSharing" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Copy/Move</h4>
+											</div>
+										<div class="modal-body">
+											<p>Sorry, that folder is no longer shared with you.</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="">Ok</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="handleSystemDesc" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title">View/Edit/Delete descriptions</h4>
+											<button type="button" class="close" data-dismiss="modal">&times;</button>	
+											</div>
+										<div class="modal-body">
+											<div id="list-sys-descriptions">
+											
+											</div>
+											<div class="progress">
+              									<div class="progress-bar" role="progressbar"></div>
+            								</div>
+											<div id="sys-desc-inputs">
+											<input id="upload-input" type="file" name="uploads[]" multiple="multiple"></br>
+											<button id="add-desc-text" class="btn btn-lg upload-btn2">Add Description</button>
+												<button class="btn btn-lg upload-btn" type="button">Upload File</button>
+												</form>	
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="">Done</button>
+										</div>
+									</div>
+								</div>
+							</div>';
+
+		return $return_add_blocks;
+	}
+
+function loadUserFolders($user_name)
+{
+	//prepare all user folders which the user owns
+	// return an array
+
+	$query=db_select('folders','f');
+	$query->fields('f',array('folder_id','folder_name'));
+	$query->condition('owner',$user_name);
+	$q_res = $query->execute();
+	//create an array with default first element as user private folder with id
+	$user_folders = array();
+	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+	while ($res = $q_res->fetchAssoc()) {
+		$group = $res['folder_id'];
+		$grp_name = $res['folder_name'];
+		$user_folders[$group] = $grp_name;
+	}
+	return $user_folders;
+}
+
+
+function loadUserFolders2($user_name)
+{
+	//prepare all user folders which the user owns
+	// return an array
+
+	$query=db_select('folders','f');
+	$query->fields('f',array('folder_id','folder_name'));
+	$query->condition('owner',$user_name);
+	$q_res = $query->execute();
+	//create an array with default first element as user private folder with id
+	$user_folders = array();
+	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+	while ($res = $q_res->fetchAssoc()) {
+		$group = $res['folder_id'];
+		$grp_name = $res['folder_name'];
+		$user_folders[$group] = $grp_name;
+	}
+	$query2 = db_select('shared_members','sh');
+	$query2->fields('sh',array('folder_id'));
+	$query2->condition('member_name',$user_name);
+	$query2->condition('member_relation',0);
+	$q_res2 = $query2->execute();
+	while($res2 = $q_res2->fetchAssoc()){
+		$group2 = $res2['folder_id'];
+		if(!isset($user_folders[$group2])){
+			$folder_name = explode("-",$group2);
+			$folder_name = $folder_name[0];
+			$user_folders[$group2] = $folder_name;
+		}
+	}
+	return $user_folders;
+}
+
+
+function loadShareHolders($folder_name,$owner){
+	$query = db_select('shared_members','sh')
+		->fields('sh',array('member_name'))
+		->condition('folder_id',$folder_name."-".$owner)
+		->condition('member_relation',0)
+		->execute();
+	$shared_holders = '';
+	while($res = $query->fetchAssoc()){
+		$user = db_select('users','u')
+			->fields('u',array('mail'))
+			->condition('name',$res['member_name'])
+			->execute();
+		$username = $user->fetchAssoc();
+		$element = "
+					<tr class='eachSharedHolder'>
+					<td><div class='sharedUserContent'><span>".$res['member_name']."</span><br><span class='sharedHolderEmail'>".$username['mail']."</span></div></td>
+					<td><i class='glyphicon glyphicon-remove glyphShare' title='Unshare User' data-toggle='modal'></td>
+					</tr>";
+		$shared_holders = $shared_holders.$element;
+	}
+	return $shared_holders;
+}
+
+
+
+
