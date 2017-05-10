@@ -1,0 +1,116 @@
+<?php
+
+function classes_block_info(){
+	$blocks = array();
+	$blocks['created_classes'] = array(
+		'info' => 'Table for created classes',
+		'cache' => DRUPAL_NO_CACHE
+	);
+	$blocks['enrolled_classes'] = array(
+		'info' =>'Table for enrolled classes',
+		'cache' => DRUPAL_NO_CACHE
+	);
+
+	return $blocks;
+}
+
+function classes_block_view($delta = ''){
+	$block = array();
+	global $user;
+	$path = drupal_get_path('module', 'table');
+
+	switch($delta){
+		case 'created_classes':
+			global $user;
+			if($user->uid){
+				$classes_path = drupal_get_path('module', 'classes');
+				if (in_array('teacher', $user->roles)) {
+					$block['title'] = t('Created Classes');
+					$params = array($user->uid);
+					$block['content'] = array(
+						'#markup' => get_classes_table_html($delta, $params),
+						//'#attached' => array(
+						//	'css' => array($path.'/static/table.css')
+						//)
+					);
+				} else {
+					$block['content'] = "";
+				}
+			}
+			break;
+		case 'enrolled_classes':
+			$block['title'] = t('Enrolled Classes');
+			if($user->uid){
+				$params = array($user->uid);
+				$block['content'] = array(
+					'#markup' => get_classes_table_html($delta, $params),
+					//'#attached' => array(
+					//	'css' => array($path.'/static/table.css')
+					//)
+				);
+			} else {
+				$query = drupal_get_destination();
+				drupal_goto('user/login');
+			}
+			break;
+	}
+
+	return $block;
+}
+
+function get_classes_table_html($delta = '', $params){
+	$query = '';
+	$args = array();
+	$title = array();
+	$copyCode = FALSE;
+	$returnEmpty = '';
+	switch($delta){
+		case 'created_classes':
+			$query = 'SELECT name, code, section FROM {classes} WHERE created_by = :uid';
+			$args = array(':uid' => $params[0]);
+			$titles = array("Class Name", "Class Join Code");
+			$returnEmpty = 'No class has been created by you';
+			$copyCode = TRUE;
+			break;
+		case 'enrolled_classes':
+			$query = 'SELECT c.name, u.code, c.section, c.created_by FROM {enrolled_users} AS u JOIN {classes} AS c ON u.code = c.code WHERE uid = :uid';
+			$args = array(':uid' => $params[0]);
+			$titles = array("Class Name", "Teacher's email", "Check Progress");
+			$returnEmpty = 'Please enroll in a class to see your classes here.';
+			break;
+	}
+
+	$results = db_query($query, $args);
+	if($results->rowCount() == 0){
+		return $returnEmpty;
+	}
+
+	$data = array();
+	$index = 0;
+	while($row = $results->fetchAssoc()){
+		$c = "<span>".t($row['code'])."</span>";
+		$a = '';
+		//$serverURL = (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on'?"https":"http")."://".$_SERVER['SERVER_NAME'];
+		$serverURL = get_path();
+		$serverURL = $serverURL['url']."/";
+		$created_users = array();
+		if($copyCode){
+			//give href to teacher class page
+			$a = '<a href = "?q=class/'.$row['code'].'" title = "Open Class page" style = "cursor: hand; cursor: pointer;">'.t($row['name']).'</a>';
+			$c = '<a href = "'.$serverURL.'log/dashboard.php?t=lms-dashboard&s='.$row['section'].'" title = "Open Dashboard" target="_blank" style = "cursor: hand; cursor: pointer">'.t($row['code']).'</a>';
+			$data[$index++] = array($a, $c);
+		} else {
+			//give href to student class page
+			if(!array_key_exists($row['created_by'], $created_users)){
+				$u = user_load($row['created_by']);
+				$created_users[$row['created_by']] = $u->mail;
+			}
+			$a = t($row['name']);
+			$b = $created_users[$row['created_by']];
+			$c = '<a href = "'.$serverURL.'log/dashboard.php?t=lms-leader&s='.$row['section'].'" title = "Check Your Progress" target="_blank" style = "cursor: hand; cursor: pointer">Check</a>';
+			$data[$index++] = array($a, $b, $c);
+		}
+	}
+	
+	return create_table_html($titles, $data);
+}

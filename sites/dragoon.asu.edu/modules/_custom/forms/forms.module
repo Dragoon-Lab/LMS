@@ -1,0 +1,311 @@
+<?php
+
+function forms_block_info(){
+	$block_forms = array();
+	/*$forms['dragoon_problem'] = array(
+		'title' => t('Start Problem'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('dragoon_forms_problem_form'),
+		'access callback' => TRUE,
+		'file' => 'dragoon_forms_problem_open.inc',
+	);*/
+
+	$block_forms['dragoon_problem'] = array(
+		'info' => 'Activity and mode selection form'
+	);
+
+	$block_forms['create_class'] = array(
+		'info' => 'Create a class form'
+	);
+
+	$block_forms['enroll_class'] = array(
+		'info' => 'Enroll in a class form'
+	);
+	$block_forms['create_non_class_folder'] = array(
+		'info' => 'Creates a non class folder'
+	);
+	$block_forms['delete_non_class_folder'] = array(
+		'info' => 'Deletes a non class folder'
+	);
+	$block_forms['create_non_class_model'] = array(
+		'info' => 'Creates a Model in user folders'
+	);
+	$block_forms['manage_sharing'] = array(
+		'info' => 'Enables sharing non class folders to the system users'
+	);
+	$block_forms['move_models'] = array(
+		'info' => 'Enables moving models between user folders'
+	);
+	$block_forms['create_assignment'] = array(
+		'info' => 'Creates an assignment for a teacher'
+	);
+	$block_forms['rename_items'] = array(
+		'info' => 'renames a model or a folder'
+	);
+	return $block_forms;
+}
+
+function forms_block_view($delta = ''){
+	$block_form = array();
+	$path = drupal_get_path('module', 'forms');
+	switch($delta){
+		case "dragoon_problem":
+			module_load_include('inc', 'forms', 'forms_problem_open');
+			//$path = (drupal_get_path('module', 'forms'););
+			//drupal_add_css(drupal_get_path('module', 'forms').'/static/modal.css');
+			$form = drupal_get_form('problem_form');
+			$block_form['title'] = t("Start Problem");
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/form_modal.js'
+					)
+				),
+				'#prefix' => "<div id = 'dragoon_problem_wrapper' class = 'modal fade' role= 'dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div></div>"
+			);
+			break;
+		case "create_class":
+			global $user;
+			if($user->uid){
+				if (in_array('teacher', $user->roles)) {
+					module_load_include('inc', 'forms', 'forms_create_class');
+					$block_form['title'] = t("Create a class");
+					$block_form['content'] = drupal_get_form("create_class_form");
+				} else {
+					$block_form['content'] = "";
+				}
+			}
+			break;
+		case "enroll_class":
+			module_load_include('inc', 'forms', 'forms_enroll_class');
+			$block_form['title'] = t("Enroll in a class");
+			$block_form['content'] = drupal_get_form("enroll_class_form");
+			break;
+		case "create_non_class_folder":
+			module_load_include('inc', 'forms', 'forms_nc_create_folder');
+			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_create_folder.js');
+			//$block_form['content'] = drupal_get_form('forms_nc_class_folder_form');
+			$form = drupal_get_form('forms_nc_class_folder_form');
+			$block_form['title'] = t("Create Folder");
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_create_folder.js'
+					)
+				),
+				'#prefix' => "<div id='createFolderModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
+			);
+			break;
+		case "delete_non_class_folder":
+			module_load_include('inc', 'forms', 'forms_nc_delete_folder');
+			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_delete_folder.js');
+			$form = drupal_get_form('forms_nc_delete_folder_form');
+			$block_form['title'] = t("Delete Folders/Models");
+			//$block_form['content'] = drupal_get_form('forms_nc_delete_folder_form');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_delete_folder.js'
+					)
+				),
+				'#prefix' => "<div id='deleteFolderModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
+			);
+			break;
+		case "create_non_class_model":
+			module_load_include('inc','forms', 'forms_nc_create_model');
+			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_create_model.js');
+			$form = drupal_get_form('forms_nc_create_model_form');
+			$block_form['title'] = t('Create Model');
+			//$block_form['content'] = drupal_get_form('forms_nc_create_model_form');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_create_model.js'
+					)
+				),
+				'#prefix' => "<div id='createModelModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
+		);
+			break;
+		case "manage_sharing":
+			module_load_include('inc', 'forms', 'forms_nc_manage_sharing');
+			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_manage_sharing.js');
+			$form = drupal_get_form('forms_nc_sharing');
+			$block_form['title'] = t('Share Folders');
+			//$block_form['content'] = drupal_get_form('forms_nc_sharing');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#title'=> t('Share Folders'),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_manage_sharing.js'
+					)
+				),
+				'#prefix' => "<div id='shareFolderModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
+		);
+			break;
+		case "move_models":
+			module_load_include('inc', 'forms', 'forms_nc_move_models');
+			//drupal_add_js(drupal_get_path('module','forms').'/static/nc_move_models.js');
+			$form = drupal_get_form('forms_nc_move_models');
+			$block_form['title'] = t('Copy/Move Models');
+			//$block_form['content'] = drupal_get_form('forms_nc_move_models');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_move_models.js'
+					)
+				),
+				'#prefix' => "<div id='moveModelModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
+		);
+			break;
+		case "create_assignment":
+			module_load_include('inc', 'forms', 'forms_create_assignments');
+			$block_form['subject'] = t('Create Assignment Link');
+			$form = drupal_get_form('create_assignment_form');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array($path.'/static/create_assignment.js')
+				),
+				'#prefix' => "<div id = 'dragoon_problem_wrapper' class = 'modal fade' role= 'dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>",
+			);
+			break;
+		case "rename_items":
+			module_load_include('inc','forms','forms_nc_rename_items');
+			$form = drupal_get_form('forms_nc_rename_items');
+			$block_form['title'] = t('Rename Items');
+			//$block_form['content'] = drupal_get_form('forms_nc_sharing');
+			$block_form['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						$path.'/static/nc_rename_items.js'
+					)
+				),
+				'#prefix' => "<div id='renameItemsModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>",
+			);
+			break;
+	}
+
+	return $block_form;
+}
+
+function forms_form_alter(&$form, &$form_state, $form_id){
+	switch($form_id){
+		case "problem_form":
+			$form['#action'] = '#';
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'dragoon_problem_form',
+			);
+			$form['submit_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+				'class' => array('btn btn-success form-submit'),
+			);
+			break;
+		case "create_class":
+			$form['#submit'] = array("create_class_form_submit");
+			$form['#validate'] = array("create_class_form_validate");
+			break;
+		case "enroll_class":
+			$form['#validate'] = array("enroll_class_form_validate");
+			$form['#submit'] = array("enroll_class_form_submit");
+			break;
+		case "forms_nc_class_folder_form":
+			$form['#attributes'] = array(
+				'id' => 'dragoon_ncCFolder_form',
+			);
+			$form['cancel_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+			);
+			break;
+		case "forms_nc_delete_folder_form":
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'dragoon_ncDelFolder_form'
+			);
+			$form['submit_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+				'data-toggle'=>"modal",
+				'href'=> '#confirmDeleteModal',
+			);
+			$form['cancel_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+			);
+			break;
+		case "forms_nc_create_model_form":
+			$form['#attributes'] = array(
+				'id' => 'dragoon_ncCModel_form',
+			);
+			$form['cancel_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+			);
+			break;
+		case "forms_nc_sharing":
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'dragoon_nc_manageSharing'
+			);
+			//$form['#validate'] = array('dragoon_forms_sharing_validate');
+			break;
+		case "forms_nc_move_models":
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'dragoon_nc_move_models'
+			);
+			$form['cancel_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+			);
+			break;
+		case "create_assignment_form":
+			$form['#actions'] = "#";
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'create_assignment_form',
+			);
+			$form['#submit'] = array("create_assignment_form_submit");
+			$form['submit_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+				'class' => array('btn btn-success form-submit'),
+			);
+			break;
+		case "forms_nc_rename_items":
+			$form['#attributes'] = array(
+				//'onsubmit' => 'return false;',
+				'id' => 'dragoon_nc_rename_items'
+			);
+			$form['cancel_button']['#attributes'] = array(
+				'data-dismiss' => 'modal',
+			);
+			break;
+		case "user_register_form":
+			$form['#validate'][] = 'forms_user_validation_reg';
+			break;
+				
+	}
+}
+
+function forms_user_login(&$edit, $action){
+	$edit['redirect'] = $GLOBALS['base_url'];
+}
+
+function forms_user_validation_reg(&$form, &$form_state) {
+	$is_teacher = $form_state['values']['field_request_teacher_account']['und'][0]['value'];
+	$acad_inst = $form_state['values']['field_academic_institution']['und'][0]['value'];
+	if($is_teacher && $acad_inst == ""){
+		form_set_error('field_academic_institution', t('Please enter your academic institution.'));
+	}
+}

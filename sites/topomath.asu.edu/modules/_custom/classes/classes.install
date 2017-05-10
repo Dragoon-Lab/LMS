@@ -1,0 +1,144 @@
+<?php
+function classes_schema(){
+	$schema = array();
+
+	$schema['classes'] = array(
+		'description' => 'The base table for class data',
+		'fields' => array(
+			'name' => array(
+				'description' => 'class display name given by the teacher',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => TRUE,
+				'default' => '',
+			),
+			'code' => array(
+				'description' => '6 character class code for each class',
+				'type' => 'varchar',
+				'length' => 6,
+				'not null' => TRUE,
+				'default' => '',
+			),
+			'created_by' => array(
+				'description' => 'teacher uID',
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'length' => 11,
+				'not null' => TRUE,
+				'default' => '0',
+			),
+			'section' => array(
+				'description' => 'section name for dragoon',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => TRUE,
+				'default' => '',
+			),
+			'is_active' => array(
+				'description' => 'whether a class is currently active or not',
+				'type' => 'int',
+				'size' => 'tiny',
+				'default' => 1,
+				'not null' => TRUE,
+			),
+			'time' => array(
+				'description' => 'time stamp when the class was created',
+				'type' => 'datetime',
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+			),
+		),
+		'primary key' => array('code'),
+		'foreign keys' => array(
+			'user_constraint' => array(
+				'table' => 'users',
+				'columns' => array('created_by' => 'uid'),
+			),
+		),
+	);
+
+	$schema['enrolled_users'] = array(
+		'description' => 'Table to store the users who are enrolled in classes',
+		'fields' => array(
+			'ueid' => array(
+				'type' => 'serial',
+				'length' => 10,
+			),
+			'code' => array(
+				'description' => 'code of the class where the user enrolls', 
+				'type' => 'varchar',
+				'length' => 6,
+				'not null' => TRUE,
+			),
+			'uid' => array(
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'length' => 11,
+				'not null' => TRUE,
+				'default' => '0',
+			),
+			'time' => array(
+				'description' => 'time stamp when the class was created',
+				'type' => 'datetime',
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+			),
+		),
+		'unique keys' => array(
+			'uid_code' => array('uid', 'code'),
+		),
+		'primary key' => array('ueid'),
+		'foreign keys' => array(
+			'class_code' => array(
+				'table' => 'classes',
+				'columns' => array('code' => 'code'),
+			),
+			'user_enrolled' => array(
+				'table' => 'users',
+				'columns' => array('uid' => 'uid'),
+			),
+		),
+	);
+
+	return $schema;
+}
+
+function classes_install(){
+	db_query('
+		ALTER TABLE {classes}
+		ADD CONSTRAINT {user_constraint}
+		FOREIGN KEY (created_by) REFERENCES {users} (uid)
+	');
+
+	db_query('
+		ALTER TABLE {enrolled_users}
+		ADD CONSTRAINT {class_code}
+		FOREIGN KEY (code) REFERENCES {classes} (code)
+	');
+
+	db_query('
+		ALTER TABLE {enrolled_users}
+		ADD CONSTRAINT {user_enrolled}
+		FOREIGN KEY (uid) REFERENCES {users} (uid)
+	');
+
+	db_query('
+		ALTER TABLE {classes} 
+		MODIFY time TIMESTAMP NOT NULL 
+		DEFAULT CURRENT_TIMESTAMP 
+		ON UPDATE CURRENT_TIMESTAMP'
+	);
+
+	db_query('
+		ALTER TABLE {enrolled_users} 
+		MODIFY time TIMESTAMP NOT NULL 
+		DEFAULT CURRENT_TIMESTAMP 
+		ON UPDATE CURRENT_TIMESTAMP'
+	);
+}
+
+function classes_uninstall(){
+	db_query('
+		DROP TABLE enrolled_users, classes;
+	');
+}

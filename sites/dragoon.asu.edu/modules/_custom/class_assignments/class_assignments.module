@@ -1,0 +1,294 @@
+<?php
+
+function class_assignments_menu(){
+	$items = array();
+	
+	$items['class/%class_code'] = array(
+		'page callback' => 'class_assignments_render_page',
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['assignments/%class_assignments_code'] = array(
+		'page callback' => 'class_assignments_handle_assignment',
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK
+	);
+	return $items;
+}
+
+function class_assignments_init(){
+	drupal_add_js(drupal_get_path('module', 'class_assignments').'/static/assign_handle.js');
+}
+
+function class_assignments_render_page($class){
+	global $user;
+	if(!$user->uid){
+		drupal_goto('user/login');
+	}
+	//module_load_include('inc', 'class_assignments', 'class_assignments_blocks');
+	//echo json_encode($class);
+	if(empty($class)){
+		return '<h3>'.t('No class found').'</h3>';
+	}
+
+	$text = get_text($class['section']);
+
+	$enrolled_users_html = get_block_html(array(
+		'module' => 'class_assignments',
+		'delta' => 'enrolled_users'
+	));
+	$assignment_links_html = get_block_html(array(
+		'module' => 'class_assignments',
+		'delta' => 'assignment_links'
+	));
+	$model_library_html = get_block_html(array(
+		'module' => 'model_library',
+		'delta' => 'published_problems'
+	));
+	$non_class_models_html = get_block_html(array(
+		'module' => 'model_library',
+		'delta' => 'non_class_models'
+	));
+	//$row = $result->fetchAssoc(); //doing it here because there should be one class only with one code due to uniqueness of class code
+	$fields = 	"<input type = 'hidden' id = 'section' value = '".$class["section"]."'></input>
+				<input type = 'hidden' id = 'userName' value = '$user->name'></input>
+				<input type = 'hidden' id = 'code' value = '".$class['code']."'></input>";
+	$html = '<h2>'.t($class['name']).'</h2>'.$fields.$text;
+	$html .= $enrolled_users_html.$assignment_links_html.$model_library_html.$non_class_models_html;
+	return $html;
+}
+
+function class_assignments_handle_assignment($code){
+	//if the user is not logged in forward show the login link and once he logs in bring the user to the particular assignment
+	global $user;
+	if ($user->uid == 0){
+		 return l("Please Sign in","user/login",array('query' => drupal_get_destination()));
+	}
+	else {
+
+		//Now that the user has logged in, we perform assignment handling in 3 cases
+
+		//case 1 : check if the section of the assignment belongs to the user
+		$assignment_id = $code;
+
+		//get class code for the assignment id
+		$get_cc_q = db_select('assignments','a')
+			->fields('a',array('class_code','problem_properties'))
+			->condition('assignment_id',$assignment_id)
+			->execute();
+		$cc_d = $get_cc_q->fetchAssoc();
+		$class_code = $cc_d['class_code'];
+
+		//cross check with user class codes
+		$user_id = $user->uid;
+		$ret_cc_q = db_select('enrolled_users','e')
+			->fields('e',array('code'))
+			->condition('uid',$user_id)
+			->execute();
+		while($cc_list=$ret_cc_q->fetchAssoc()){
+			if($cc_list['code'] == $class_code){
+
+				//case 2 assignment belongs to a user class
+				//so, now fetch the assignment
+				//case 2 checks the mode of the problem opened
+				//if a non author mode forwards to dragoon tutor
+
+				$props = json_decode($cc_d['problem_properties'],true);
+				$prob = $props["p"];
+				$mode = $props["m"];
+				$activ = $props["a"];
+				$sm = $props["sm"];
+				$sec = $props["s"];
+				$is = $props["is"];
+				$addGroup = "";
+				if(isset($props["g"]) && $props["g"] != ""){
+					$grp = $props["g"];
+					$addGroup = "<input type='hidden' name='g' value='$grp'>";
+				}
+
+
+				$echo = "<div id='messageReader'>Creating Problem</div>
+							<form id='nonAuthData'>
+								<input type='hidden' name='u' value='$user->name'>
+								<input type='hidden' name='p' value='$prob'>
+								<input type='hidden' name='a' value='$activ'>
+								<input type='hidden' name='m' value='$mode'>
+								<input type='hidden' name='sm' value='$sm'>
+								<input type='hidden' name='s' value='$sec'>
+								<input type='hidden' name='is' value='$is'>".
+								$addGroup."
+							</form>";
+
+				if($props["m"] != "AUTHOR"){
+					//redirect to dragoon
+					//add an additional property of user name
+					$echo = $echo."<div id='cardReader' style='display: none;'>nonAuthor</div>";
+					return $echo;
+				}
+				else{
+					$echo = $echo."<div id='cardReader' style='display: none;'>Author</div>";
+
+					//attach the folder modal
+					$userFoldersList  = loadUserFolders2($user->name);
+					$options = "";
+					foreach($userFoldersList as $fid => $fname){
+						$options = $options. "<option value='".$fid."'>".$fname."</option>";
+					}
+					$echo = $echo.'<div id="userOpenAuthorProb" class="modal fade" role="dialog">
+										<div class="modal-dialog">
+											<div class="modal-content">
+												<div class="modal-header">
+													 <h4 class="modal-title">Select a folder to save your problem model</h4>
+												</div>
+												<div class = "modal-body">
+													<select id="authorDest" name="authorAssignSave" class="form-control">'.$options.'</select>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-success" data-dismiss="modal" id="openAuthorAssign">Open Problem</button>
+												</div>
+											</div>
+										</div>
+									</div>';
+					return $echo;
+				}
+			}
+		}
+		$echo = "You do not have access to this problem. Please make sure you are enrolled in this class. If you are not, please contact your teacher for the class join code.";
+		return $echo;
+	}
+}
+
+function class_assignments_code_load($code){
+	return $code;
+}
+
+function class_code_load($code){
+	global $user;
+
+	$query = 'SELECT * FROM classes WHERE code = :code AND created_by = :uid';
+	$result = db_query($query, array(':code' => $code, ':uid' => $user->uid));
+
+	while($row = $result->fetchAssoc()){
+		if($row['code'] == $code){
+			return $row;
+		}
+	}
+}
+
+function get_class_assignment_description(){
+	return '';
+}
+
+function get_block_HTML($params){
+	$block = block_load($params['module'], $params['delta']);
+	$output = _block_get_renderable_array(_block_render_blocks(array($block)));
+
+	return '<section id = "block-'.$params['module'].'-'.$params['delta'].'" class = "blocks blocks-'.$params['delta'].' contextual-links-region">'.drupal_render($output).'</section>';
+}
+
+function class_assignments_block_info(){
+	$blocks = array();
+	$blocks['assignment_links'] = array(
+		'info' => 'Table of assignments created by the teacher',
+		'cache' => DRUPAL_NO_CACHE
+	);
+	$blocks['enrolled_users'] = array(
+		'info' => 'Table of students enrolled in a class',
+		'cache' => DRUPAL_NO_CACHE
+	);
+
+	return $blocks;
+}
+
+function class_assignments_block_view($delta = ''){
+	$block = array();
+	global $user;
+	$path = drupal_get_path('modules', 'table');
+
+	switch($delta){
+		case 'assignment_links':
+			$params = array(
+				'uid' => $user->uid,
+				'code' => arg(1),
+				'titles' => array('Problem Name', 'Model', 'Problem Links')
+			);
+			$block['title'] = t('Created Problem Links');
+			$block['content'] = array(
+				'#markup' => get_assignments_table($params),
+				//'#attached' => array(
+				//	'css' => array($path.'/static/table.css')
+				//)
+			);
+			break;
+		case 'enrolled_users':
+			$params = array(
+				'code' => arg(1),
+				'titles' => array('Student ID', 'First Name', 'Last Name', 'Email ID')
+			);
+			$block['title'] = t('Enrolled Students');
+			$block['content'] = array(
+				'#markup' => get_enrolled_users_table($params),
+				//'#attached' => array(
+				//	'css' => array($path.'/static/table.css')
+				//)
+			);
+			break;
+	}
+
+	return $block;
+}
+
+function get_assignments_table($params){
+	$query = 'SELECT c.code, a.assignment_id, a.assignment_name, a.problem FROM classes AS c JOIN assignments AS a ON c.code = a.class_code WHERE c.created_by = :uid AND c.code = :code ORDER BY a.time ASC';
+	$args = array(
+		':uid' => $params['uid'],
+		':code' => $params['code']
+	);
+	$results = db_query($query, $args);
+
+	if($results->rowCount() == 0)
+		return "There are no problems for this class";
+
+	$serverURL = get_path();
+	$serverURL = $serverURL['serverURL'];
+	$data = array();
+	$index = 0;
+	while($row = $results->fetchAssoc()){
+		if($row['code'] == $params['code']){
+			$a = $row['assignment_name'];
+			$p = $row['problem'];
+			$l = $serverURL.url('assignments/'.$row['assignment_id']);
+			$data[$index++] = array($a, $p, $l);
+		}
+	}
+
+	return create_table_html($params['titles'], $data);
+}
+
+function get_enrolled_users_table($params){
+	$query = 'SELECT c.code, u.uid FROM classes as c JOIN enrolled_users as u ON c.code = u.code WHERE c.code = :code';
+	$results = db_query($query, array(':code' => $params['code']));
+
+	if($results->rowCount() == 0)
+		return "No student are enrolled in the class.";
+
+	$data = array();
+	$index = 0;
+	while($row = $results->fetchAssoc()){
+		if($row['code'] == $params['code']){
+			$u = user_load($row['uid']);
+			$data[$index++] = array($u->name, $u->field_first_name['und'][0]['safe_value'], $u->field_last_name['und'][0]['safe_value'], $u->mail);
+		}
+	}
+
+	return create_table_html($params['titles'], $data);
+}
+function get_text($section){
+	$url = get_path();
+	$url = $url['url']."/log/dashboard.php?t=lms-dashboard&s=".$section;
+	$html = "<p>To create a new problem, find the model you want to use in the menu below and click on it.  Fill out the form that appears and the problem link will then be added to that class's page.</p><p>You can copy the link and send it to your students using your preferred channel of communication, and they can click it to begin the assignment.  Note: this website does not send the link to the students.  You must send it to them or they will not see it.</p><p>To view the students work:<ol><li>If the problem mode was 'edit the model', ask the student to put it in a shared folder for you to view.</li><li>Otherwise, you can view their progress by clicking the 'dashboard' button.</li></ol></p><div class = 'right'><a href = '$url' title = \"Check Student's Progress\" target = '_blank'><input class = 'btn btn-success btn-md' type = 'submit' value = 'Open Dashboard'/></a></div><div class = 'clear'></div>";
+	return $html;
+}
