@@ -1,5 +1,15 @@
 <?php
 
+/**
+* The idea for resource bundles is to create static functions in drupal and call them
+* from the piece of code that that will handle it.
+* https://api.drupal.org/api/drupal/includes%21bootstrap.inc/function/drupal_static/7.x
+* To understand drupal_static
+*
+* For Javascript these values will have to be added to the DOM structures and picked in JS.
+* I have tested it, and it works fine. It was dummy code and I am not committing that
+* ~ Sachin
+**/
 function get_problem_open_options(){
 	$options = &drupal_static(__FUNCTION__);
 	if(!isset($options)){
