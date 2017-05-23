@@ -1,8 +1,0 @@
-name = Dragoon Forms
-description = Contains all the forms used for Dragoon.
-package = Forms
-core = 7.x
-version = "7.x-0.1"
-core = "7.x"
-files[] = forms_utils.inc
-dependencies[] = url_dragoon
