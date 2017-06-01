@@ -7,3 +7,4 @@ core = "7.x"
 dependencies[] = nested_accordion
 dependencies[] = NC_models
 dependencies[] = url_dragoon
+dependencies[] = resource_bundle

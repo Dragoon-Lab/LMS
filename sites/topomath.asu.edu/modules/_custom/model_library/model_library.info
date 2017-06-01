@@ -1,9 +1,0 @@
-name = Model Page Blocks
-description = Show published problems, class problems and non-class problems as blocks.
-core = 7.x 
-package = LMS pages
-version = "7.x-0.1"
-core = "7.x"
-dependencies[] = nested_accordion
-dependencies[] = NC_models
-dependencies[] = url_dragoon

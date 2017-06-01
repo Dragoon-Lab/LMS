@@ -16,7 +16,8 @@ function problem_form($form, &$form_state){
 
 	$form['m'] = array(
 		'#type' => 'radios',
-		'#options' => array(
+		'#required' => TRUE,
+		/*'#options' => array(
 			'STUDENT&a=executionDemo' => t('Step through running the model'),
 			'STUDENT&a=execution' => t('Run the model manually'),
 			'COACHED&a=construction' => t('Reconstruct the model - Feedback on everything'),
@@ -26,9 +27,13 @@ function problem_form($form, &$form_state){
 			'AUTHOR&a=construction' => t('Edit the model'),
 		),
 		'#title' => t('Select a method to start Dragoon problem'),
-		'#required' => TRUE,
-		'#default_value' => 'COACHED&a=construction',
+		'#default_value' => 'COACHED&a=construction',*/
 	);
+
+	$mode_options = get_problem_open_options();
+	foreach($mode_options as $option => $value){
+		$form['m'][$option] = $value;
+	}
 
 	/*$form['m'] = array(
 		'#type' => 'radios',
@@ -89,7 +94,7 @@ function problem_form($form, &$form_state){
 		'#type' => 'hidden',
 		'#value' => $rp,
 	);
-	
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Open Problem'),

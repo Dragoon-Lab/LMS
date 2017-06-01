@@ -1,0 +1,6 @@
+name = Resource Bundles
+description = Handle resource values for variables used separately for each website.
+core = 7.x 
+package = Custom
+version = "7.x-0.1"
+core = "7.x"

@@ -1,8 +1,0 @@
-name = Class blocks
-description = Creates blocks for class page.
-core = 7.x 
-package = LMS pages
-version = "7.x-0.1"
-core = "7.x"
-dependencies[] = table
-dependencies[] = url_dragoon

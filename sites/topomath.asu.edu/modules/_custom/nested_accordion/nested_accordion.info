@@ -1,6 +1,0 @@
-name = Nested Accordion View
-description = Converts a json to html structure which behaves like a nested accordion.
-core = 7.x
-package = Views
-version = "7.x-0.1"
-core = "7.x"
