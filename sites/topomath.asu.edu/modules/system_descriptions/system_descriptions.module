@@ -1,0 +1,49 @@
+<?php
+function system_descriptions_form_alter(&$form, &$form_state, $form_id){
+	switch($form_id){
+		case "problem_form":
+			$form['sys-desc-inp'] = array(
+				'#type' => 'button',
+				'#value' => 'System descriptions',
+				'#id' => 'open_sysdescmodal',
+				'#display' => 'none',
+				'#weight' => '-5'
+			); 
+			$form['#attached']['js'] = array(
+				drupal_get_path('module', 'system_descriptions') . '/static/sys_desc.js',
+			);
+			break;
+		}
+	}
+
+function copyMoveExtension($src,$dest,$action){
+	//echo "hello world";
+	if($action == "moveModel"){
+		//update system descriptions where a match with source folder
+		$query =  db_update('system_descriptions')
+                    ->fields(array(
+                        'sd_folder' => $dest,
+                    ))
+                    ->condition('sd_folder',$src)
+                    ->execute();
+        if($query)
+        	return true;
+	}
+	else if($action == "copyModel"){
+		//copy the system descriptions to new folder
+		$row_details = db_select('system_descriptions','sh')->fields('sh',array('sd_name','sd_uname','sd_pname','sd_path','sd_section','sd_type'))->condition('sd_folder',$src)->execute();
+		while($sys_desc_each = $row_details->fetchAssoc()){
+			$query = db_insert('system_descriptions')->
+					fields(array(
+						"sd_name" => $sys_desc_each["sd_name"],
+						"sd_uname" => $sys_desc_each["sd_uname"],
+						"sd_pname" => $sys_desc_each["sd_pname"],
+						"sd_path" => $sys_desc_each["sd_path"],
+						"sd_folder" => $dest,
+						"sd_section" => $sys_desc_each["sd_section"],
+						"sd_type" => $sys_desc_each["sd_type"]
+						))-> execute();
+		}
+	}
+}
+

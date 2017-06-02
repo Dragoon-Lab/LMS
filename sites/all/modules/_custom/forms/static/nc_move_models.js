@@ -102,7 +102,6 @@ jQuery(document).ready(function($) {
     var modelAction = function(action){
         var form = document.forms['dragoon_nc_move_models'];
         var user = form["u"].value;
-        console.log();
         $.ajax({
             type: "POST",
             url: $("#dragoon_url").val()+"global.php",
@@ -112,7 +111,8 @@ jQuery(document).ready(function($) {
                 "src": src_select.val(),
                 "mod": model_select.val(),
                 "dest": dest_select.val(),
-                "user": user
+                "user": user,
+                "section": "non-class-models"
             },
             success: function (data) {
                 console.log("moved", data);
@@ -120,6 +120,23 @@ jQuery(document).ready(function($) {
             },
             error: function (data) {
                 console.log("move failed", data);
+            }
+        });
+
+        $.ajax({
+            type: "POST",
+            url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
+            data: {
+                "req_type": "modelAction",
+                "action": action,
+                "src": src_select.val(),
+                "dest": dest_select.val(),
+            },
+            success: function(data){
+                console.log("sys desc", data);
+            },
+            error: function(data){
+                console.log("failed",data);
             }
         });
     };
@@ -147,8 +164,8 @@ jQuery(document).ready(function($) {
             var form = document.forms['dragoon_nc_move_models'];
             var user = form["u"].value;
             var owner = src_select.val().split("-");
-            console.log("owner is",owner);    
-            if(owner[1] == user || owner[0] == "private")
+            console.log("owner is",owner, user);    
+            if(owner[0] == user || owner[1] == user)
                 modelAction("copyModel");
             else{
                 console.log("contacting check sharing");

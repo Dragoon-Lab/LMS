@@ -12,6 +12,7 @@ function problem_form($form, &$form_state){
 		'#type' => 'textfield',
 		'#title' => t('Problem'),
 		'#disabled' => TRUE,
+		'#weight' => '-6'
 	);
 
 	$form['m'] = array(

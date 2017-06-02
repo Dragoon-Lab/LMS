@@ -9,9 +9,6 @@ jQuery(document).ready(function($) {
         checkValidity(model_name,owner);
     });
 
-
-
-
     function checkValidity(model_name,owner){
         //empty case
         if(model_name == ''){
@@ -61,9 +58,10 @@ jQuery(document).ready(function($) {
         form.setAttribute("target", "_blank");
         form.setAttribute("method", "POST");
         form["g"].value = $('#create_model_folder_name').val();
+        form["f"].value = form["g"].value;
         form.submit();
         setTimeout(function(){
-            location.reload();
+            //location.reload();
         },2000);
     }
 
