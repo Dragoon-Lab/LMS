@@ -184,7 +184,58 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>';
+                            </div>
+                            <div id="handleSystemDesc" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">View/Edit/Delete descriptions</h4>
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>   
+                                            </div>
+                                        <div class="modal-body">
+                                            <div id="list-sys-descriptions">
+                                            
+                                            </div>
+                                            <div id="sysDesc-error-box" style="color: red">
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar"></div>
+                                            </div>
+                                            <div id="sys-desc-inputs">
+                                            <input id="upload-input" type="file" name="uploads"></br>
+                                            <button id="add-desc-text" class="btn btn-lg upload-btn2">Add Description</button>
+                                                <button class="btn btn-lg upload-btn" type="button">Upload File</button>
+                                                </form> 
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" id="">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="confirmRemoveSysDesc" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title">Confirm Delete System Description</h4>
+                                            </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete?</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" id="removeSysDescConfirmed">Yes! Delete</button>
+                                            <button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ';
 
         return $return_add_blocks;
     }

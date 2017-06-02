@@ -51,6 +51,10 @@ function forms_nc_create_model_form($form, &$form_state){
         '#type' => 'hidden',
         '#value' => $name."-private",
     );
+    $form['f'] = array(
+        '#type' => 'hidden',
+        '#value' => $name."-private",
+    );
 
     $form['rp'] = array(
         '#type' => 'hidden',
@@ -78,7 +82,7 @@ function forms_nc_create_model_form($form, &$form_state){
     $form['z'] = array(
         //stores existing models
         '#type' => 'hidden',
-        '#value' => $json,
+        '#value' => ''.$json,
     );
     $form['cancel_button'] = array(
         '#type' => 'button',

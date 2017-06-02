@@ -233,9 +233,21 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
                     ))
                     ->condition('folder_id',$new_folder_id)
                     ->execute();
-                if($query && $query2)
+                $query3 = copyMoveExtension($old_folder_id,$new_folder_id,"moveModel");
+                if($query && $query2 && query3)
                     echo "success";
+                else
+                	echo "fail";
                 break;
+
+            
+            case "modelAction":
+            	$src = $_REQUEST["src"];
+            	$dest = $_REQUEST["dest"];
+            	$action = $_REQUEST["action"];
+        
+            	copyMoveExtension($src,$dest,$action);
+            	break;    
         }
     }
 

@@ -17,6 +17,8 @@ jQuery(document).ready(function($) {
 		var form = document.forms['dragoon_problem_form'];
 		if(form["g"] != undefined)
 			form["g"].remove();
+		if(form["f"] != undefined)
+			form["g"].remove();
 		//also make sure other fields like section are set to default values
 		form["s"].value = "public-login";
 		if(event.data.hasOwnProperty("update") && event.data.update == true){
@@ -153,9 +155,17 @@ jQuery(document).ready(function($) {
 		if(form["g"] != undefined){
 			form["g"].remove();
 		}
+		if(form["f"] != undefined){
+			form["f"].remove();
+		}
 		var hiddenGroupField = document.createElement("input");
 		hiddenGroupField.setAttribute("type", "hidden");
 		hiddenGroupField.setAttribute("name", "g");
+		hiddenGroupField.setAttribute("value", group_name);
+		form.appendChild(hiddenGroupField);
+		var hiddenGroupField = document.createElement("input");
+		hiddenGroupField.setAttribute("type", "hidden");
+		hiddenGroupField.setAttribute("name", "f");
 		hiddenGroupField.setAttribute("value", group_name);
 		form.appendChild(hiddenGroupField);
 	});
