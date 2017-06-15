@@ -5,11 +5,11 @@ function model_library_block_info(){
 	$blocks['published_problems'] = array(
 		'info' => 'Block for published problems'
 	);
-    $blocks['non_class_models'] = array(
+	$blocks['non_class_models'] = array(
 		'info' => 'Block lists non class models',
 		'cache' => DRUPAL_NO_CACHE
-    );
-    return $blocks;
+	);
+	return $blocks;
 }
 
 function model_library_block_view($delta = ""){
@@ -18,7 +18,7 @@ function model_library_block_view($delta = ""){
 
 	switch ($delta){
 		case "published_problems":
-            $block['subject'] = t('Model Library');
+			$block['subject'] = t('Model Library');
 			$parameters = array(
 				'id' => 'problem',
 				'href' => '#',
@@ -39,23 +39,26 @@ function model_library_block_view($delta = ""){
 				)
 			);
 			break;
-        case "non_class_models":
-            global $user;
-            $block['subject'] = t('Custom Models');
-            $parameters = array(
-                'id' => 'nc_problem',
-                'href' => '#',
-                'appendHref' => false,
-                'addKey' => 'key',
-                'addValue'=> 'value',
+		case "non_class_models":
+			global $user;
+			$block['subject'] = t('Custom Models');
+			$parameters = array(
+				'id' => 'nc_problem',
+				'href' => '#',
+				'appendHref' => false,
+				'addKey' => 'key',
+				'addValue'=> 'value',
 //				'otherHref' => ' #drag-main-sec',
-                'otherTags' => 'class = "dragoon_nc_problem" data-toggle = "modal" data-target = "#dragoon_problem_wrapper"',
-            );
-            if(user_is_logged_in()) {
-                $json = loadNCModels($user->name,0);
-                $content = getHTMLStructure($json, $parameters);
+				'otherTags' => 'class = "dragoon_nc_problem" data-toggle = "modal" data-target = "#dragoon_problem_wrapper"',
+			);
+			if(user_is_logged_in()) {
+				$json = loadNCModels($user->name,0);
+				$content = getHTMLStructure($json, $parameters);
 				if(arg(0) != "class"){
-					$content .= createAdditionalBlocks($content);
+					//specific blocks refer to site specific blocks(like system description specific blocks in case of topomath)
+					$content .= createCommonBlocks($content);
+					if(function_exists('createSpecificBlocks'))
+						$content .= createSpecificBlocks();
 				}
 				$block['content'] = array(
 					'#markup' => $content,
@@ -64,11 +67,11 @@ function model_library_block_view($delta = ""){
 						'css' => array($path.'/static/accordion.css')
 					)
 				);
-            }
-            else
-                $block['content'] = "Please Login to check your non class models";
-            break;
-    }
+			}
+			else
+				$block['content'] = "Please Login to check your non class models";
+			break;
+	}
 
 	return $block;
 }

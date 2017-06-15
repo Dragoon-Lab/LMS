@@ -46,8 +46,13 @@ function forms_nc_create_model_form($form, &$form_state){
         '#type' => 'hidden',
         '#value' => "non-class-models",
     );
-
+    //we are using both g and f parameters (to cater both dragoon and topomath)
+    //this is temporary work around, will need to update this after discussion
     $form['g'] = array(
+        '#type' => 'hidden',
+        '#value' => $name."-private",
+    );
+    $form['f'] = array(
         '#type' => 'hidden',
         '#value' => $name."-private",
     );
@@ -78,7 +83,7 @@ function forms_nc_create_model_form($form, &$form_state){
     $form['z'] = array(
         //stores existing models
         '#type' => 'hidden',
-        '#value' => $json,
+        '#value' => ''.$json,
     );
     $form['cancel_button'] = array(
         '#type' => 'button',

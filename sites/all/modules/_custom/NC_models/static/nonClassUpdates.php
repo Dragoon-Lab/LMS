@@ -214,46 +214,65 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 				//echo "count is".$count;
 				break;
 
-            case "renameFolder":
-                $old_folder_id = $_REQUEST["old_folder_id"];
-                $new_folder_id = $_REQUEST["new_folder_id"];
-                $new_folder_name = $_REQUEST["new_folder_name"];
+			case "renameFolder":
+				$old_folder_id = $_REQUEST["old_folder_id"];
+				$new_folder_id = $_REQUEST["new_folder_id"];
+				$new_folder_name = $_REQUEST["new_folder_name"];
 
-                $query =  db_update('folders')
-                    ->fields(array(
-                        'folder_id' => $new_folder_id,
-                        'folder_name' => $new_folder_name,
-                    ))
-                    ->condition('folder_id',$old_folder_id)
-                    ->execute();
+				$query =  db_update('folders')
+					->fields(array(
+						'folder_id' => $new_folder_id,
+						'folder_name' => $new_folder_name,
+					))
+					->condition('folder_id',$old_folder_id)
+					->execute();
 
-                $query2 =  db_update('shared_members')
-                    ->fields(array(
-                        'folder_id' => $old_folder_id,
-                    ))
-                    ->condition('folder_id',$new_folder_id)
-                    ->execute();
-                if($query && $query2)
-                    echo "success";
-                break;
-        }
-    }
+				$query2 =  db_update('shared_members')
+					->fields(array(
+						'folder_id' => $old_folder_id,
+					))
+					->condition('folder_id',$new_folder_id)
+					->execute();
+				if(function_exists('renameExtension')){
+					//renameExtension function handles the additional functionality to be added in each of the sites
+					$query3 = renameExtension($old_folder_id,$new_folder_id);
+				}else{
+					$query3 = true;
+				}
+				if($query && $query2 && $query3)
+					echo "success";
+				else
+					echo "fail";
+				break;
+	
+			case "modelAction":
+				$src = $_REQUEST["src"];
+				$dest = $_REQUEST["dest"];
+				$action = $_REQUEST["action"];
+				
+				if(function_exists('copyMoveExtension')){
+					//copyMoveExtension function handles the additional functionality to be added in each of the sites
+					copyMoveExtension($src,$dest,$action);
+				}
+				break;    
+		}
+	}
 
-    function deleteModels($del_models,$del_folders){
-        $url = get_path()['url'].'/global.php';
-        $data = array('t' => 'deleteNonClassProblems', 'dm' => $del_models, 'df' => $del_folders);
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        if ($result === FALSE) { /* Handle error */
-            echo "something failed";
-        }
-        print_r($del_folders);
-        print_r($del_models);
-    }
+	function deleteModels($del_models,$del_folders){
+		$url = get_path()['url'].'/global.php';
+		$data = array('t' => 'deleteNonClassProblems', 'dm' => $del_models, 'df' => $del_folders);
+		$options = array(
+			'http' => array(
+				'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+				'method'  => 'POST',
+				'content' => http_build_query($data)
+			)
+		);
+		$context  = stream_context_create($options);
+		$result = file_get_contents($url, false, $context);
+		if ($result === FALSE) { /* Handle error */
+			echo "something failed";
+		}
+		print_r($del_folders);
+		print_r($del_models);
+	}
