@@ -1,0 +1,118 @@
+<?php
+
+function system_descriptions_form_alter(&$form, &$form_state, $form_id){
+	switch($form_id){ 
+		case "problem_form": //adds the system description button with weight -5 so that it appears just after the
+			$form['sys-desc-inp'] = array(
+				'#type' => 'button',
+				'#value' => 'System descriptions',
+				'#id' => 'open_sysdescmodal',
+				'#display' => 'none',
+				'#weight' => '-5'
+			); 
+			$form['#attached']['js'] = array(
+				drupal_get_path('module', 'system_descriptions') . '/static/sys_desc.js',
+			);
+			break;
+		}
+	}
+
+/* creates additional blocks which are specific to topomath in context of system descriptions*/
+function createSpecificBlocks(){
+	$specific_blocks = '<div id="handleSystemDesc" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title">View/Edit/Delete descriptions</h4>
+											<button type="button" class="close" data-dismiss="modal">&times;</button>   
+											</div>
+										<div class="modal-body">
+											<div id="list-sys-descriptions">
+											
+											</div>
+											<div id="sysDesc-error-box" style="color: red">
+											</div>
+											<div class="progress">
+												<div class="progress-bar" role="progressbar"></div>
+											</div>
+											<div id="sys-desc-inputs">
+											<input id="upload-input" type="file" name="uploads"></br>
+											<button id="add-desc-text" class="btn btn-lg upload-btn2">Add Description</button>
+												<button class="btn btn-lg upload-btn" type="button">Upload File</button>
+												</form> 
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="">Done</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div id="confirmRemoveSysDesc" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Delete System Description</h4>
+											</div>
+										<div class="modal-body">
+											<p>Are you sure you want to delete?</p>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="removeSysDescConfirmed">Yes! Delete</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>';
+	return $specific_blocks;
+}
+/*this function hosts additional copy/move functionality from common site */
+function copyMoveExtension($src, $dest, $action){
+	if($action == "moveModel"){
+		//move the system descriptions to new table( simply update the folder name)
+		return updateFolder($src, $dest);
+	}
+	else if($action == "copyModel"){
+		//copy the system descriptions to new folder
+		$row_details = db_select('system_descriptions','sh')->fields('sh',array('sd_name','sd_uname','sd_pname','sd_path','sd_section','sd_type'))->condition('sd_folder',$src)->execute();
+		while($sys_desc_each = $row_details->fetchAssoc()){
+			$query = db_insert('system_descriptions')->
+					fields(array(
+						"sd_name" => $sys_desc_each["sd_name"],
+						"sd_uname" => $sys_desc_each["sd_uname"],
+						"sd_pname" => $sys_desc_each["sd_pname"],
+						"sd_path" => $sys_desc_each["sd_path"],
+						"sd_folder" => $dest,
+						"sd_section" => $sys_desc_each["sd_section"],
+						"sd_type" => $sys_desc_each["sd_type"]
+						))-> execute();
+		}
+	}
+}
+
+/*this function hosts additional rename functionality from common site */
+
+function renameExtension($src, $dest){
+	//In the renameExtension function in topomath, in the context of system descriptions
+	//if a folder is renamed it has to be reflected in system descriptions table
+	return updateFolder($src, $dest);
+}
+
+/* updateFolder functions updates the folder name in system_descriptions table
+*/
+function updateFolder($old, $new){
+
+		$query =  db_update('system_descriptions')
+					->fields(array(
+						'sd_folder' => $new,
+					))
+					->condition('sd_folder',$old)
+					->execute();
+		if($query)
+			return true;
+}
+
