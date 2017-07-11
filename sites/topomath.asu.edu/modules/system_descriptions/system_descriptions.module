@@ -15,9 +15,11 @@ function system_descriptions_form_alter(&$form, &$form_state, $form_id){
 			);
 			break;
 		}
+
 	}
 
 /* creates additional blocks which are specific to topomath in context of system descriptions*/
+
 function createSpecificBlocks(){
 	$specific_blocks = '<div id="handleSystemDesc" class="modal fade" role="dialog">
 								<div class="modal-dialog">
@@ -70,6 +72,7 @@ function createSpecificBlocks(){
 							</div>';
 	return $specific_blocks;
 }
+
 /*this function hosts additional copy/move functionality from common site */
 function copyMoveExtension($src, $dest, $action){
 	if($action == "moveModel"){
@@ -115,4 +118,68 @@ function updateFolder($old, $new){
 		if($query)
 			return true;
 }
+
+/* Adding two separate blocks to host add new system descriptions and edit system descriptions forms*/
+	
+function system_descriptions_block_info(){
+	$blocks = array();
+	$blocks['new_system_descriptions'] = array(
+		'info' => 'Block for adding new description'
+	);
+	$blocks['edit_system_descriptions'] = array(
+		'info' => 'Block for editing system descriptions',
+	);
+	return $blocks;
+}
+
+function system_descriptions_block_view($delta = ""){
+	$block = array();
+	$has_msg = isset($_REQUEST['msg'])?true:false;
+	if($has_msg){
+		$msg = $_REQUEST['msg'];
+		switch ($delta) {
+			case "new_system_descriptions":
+				if($msg == "added")
+					$block['content'] = "System description has been added succesfully";
+			break;
+			
+			case "edit_system_descriptions":
+				if($msg == "edited")
+					$block['content'] = "System description has been updated succesfully";
+				break;
+		}
+
+		return $block;
+	}
+
+	$edit_desc = isset($_REQUEST['edit'])?true:false;
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/ckeditor.js');
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/adapters/jquery.js');
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/manage_ck.js');
+	
+	switch ($delta){
+		case "new_system_descriptions":
+			
+			if(!$edit_desc){
+				module_load_include('inc', 'system_descriptions', 'system_descriptions_new_desc_form');
+				$form = drupal_get_form('system_descriptions_new_desc_form');
+				$block['content'] = array(
+					'#markup' => drupal_render($form),
+				);
+			}
+			break;
+		case "edit_system_descriptions":
+			if($edit_desc){
+				module_load_include('inc', 'system_descriptions', 'system_descriptions_edit_desc_form');
+				$form = drupal_get_form('system_descriptions_edit_desc_form');
+				$block['content'] = array(
+					'#markup' => drupal_render($form),
+				);
+			}
+			break;
+	}
+
+	return $block;
+}
+			
 
