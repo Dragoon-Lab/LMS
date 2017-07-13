@@ -100,20 +100,7 @@
 
 	function createCommonBlocks($dataTree){
 
-		$common_blocks='<div class="nc_func_but container non-class-buttons">
-								<div class="row">
-									<ul class="col-md-12 col-sm-12">
-										<li><a href="#createFolder" class="btn btn-success btn-md createFolderClass" data-toggle="modal" data-target="#createFolderModal">Create folder</a></li>
-										<li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#deleteFolderModal">Delete items</a></li>
-										<li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#createModelModal">Create model</a></li>
-									   <li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#shareFolderModal">Manage sharing</a></li>
-									   <li><a href="#deleteFolder" class="btn btn-success btn-md modAction" data-toggle="modal" data-target="#moveModelModal">Move Models</a></li>
-									   <li><a href="#deleteFolder" class="btn btn-success btn-md modAction" data-toggle="modal" data-target="#moveModelModal">Copy Models</a></li>
-									   <li><a href="#deleteFolder" class="btn btn-success btn-md" data-toggle="modal" data-target="#renameItemsModal">Rename items</a></li>
-									   </ul>
-								</div>
-							</div>
-							<div id="confirmDeleteModal" class="modal fade" role="dialog">
+		$common_blocks='<div id="confirmDeleteModal" class="modal fade" role="dialog">
 								<div class="modal-dialog">
 								<!-- Modal content-->
 									<div class="modal-content">
@@ -185,7 +172,6 @@
 								</div>
 							</div>							
 							';
-
 		return $common_blocks;
 	}
 
