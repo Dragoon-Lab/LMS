@@ -1,5 +1,4 @@
 <?php
-//define('DRUPAL_ROOT', '/Applications/XAMPP/htdocs/dragoon-lms');
 $drp_root_handle=fopen("drupal_root","r");
 $drupal_root = fgets($drp_root_handle);
 fclose($drp_root_handle);
@@ -7,21 +6,21 @@ define('DRUPAL_ROOT', trim($drupal_root));
 require_once "".DRUPAL_ROOT . "/includes/bootstrap.inc";
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 $request_type = $_REQUEST["req_type"];
-takeAction($request_type);
+take_action($request_type);
 
 //All take actions require a working db connection
-function takeAction($case=" "){
-
+function take_action($case=" "){
+	$section = isset($_REQUEST['s'])?$_REQUEST['s']:null;
+	$folder = isset($_REQUEST['f'])?$_REQUEST['f']:null;
+	$prob = isset($_REQUEST['p'])?$_REQUEST['p']:null;
+			
 	switch ($case) {
-		case "newDesc":
+		case "new_desc":
 			//add the new description to data base from the input parameters
-			$name = $_REQUEST['n'];
-			$user = $_REQUEST['u'];
-			$section = $_REQUEST['s'];
-			$folder = $_REQUEST['f'];
-			$prob = $_REQUEST['p'];
-			$path = $_REQUEST['path'];
-			$type = $_REQUEST['desc_type'];
+			$name = isset($_REQUEST['n'])?$_REQUEST['n']:null;
+			$user = isset($_REQUEST['u'])?$_REQUEST['u']:null;;
+			$path = isset($_REQUEST['path'])?$_REQUEST['path']:null;
+			$type = isset($_REQUEST['desc_type'])?$_REQUEST['desc_type']:null;
 			$q_res = $query=db_insert('system_descriptions')
 				->fields(array(
 					'sd_name' => ''.$name,
@@ -31,34 +30,13 @@ function takeAction($case=" "){
 					'sd_section' => ''.$section,
 					'sd_path' => ''.$path,
 					'sd_type' => ''.$type
-				))->execute();
-			if(isset($_REQUEST['save_file']) && $_REQUEST['save_file'] == true){
-				$text_info = $_REQUEST['c'];
-				$file = "../uploads/".$path;
-				file_put_contents($file, $text_info, FILE_APPEND | LOCK_EX);
-				echo "file save success!";
-			}
-				
-			return $q_res;
+				))->execute();				
+			echo $q_res;
 			break;
-
-		case "updateDesc":
-			//update the description, this case only has the source in ckeditor
-			// technically path does not changes, so no database update, rather just update content in file
-			$text_info = $_REQUEST['c'];
-			$path = $_REQUEST['p'];
-			$file = "../uploads/".$path;
-			echo $file;
-			file_put_contents($file, $text_info);
-			echo "file update success!";
-			break;
-
-		case "refreshList":
+			
+		case "refresh_list":
 			//refreshes the list of descriptions to list to the user
-			$prob = $_REQUEST['p'];
-			$section = $_REQUEST['s'];
-			$folder = $_REQUEST['f'];
-			$returnList = array();
+			$return_list = array();
 			$cond = db_and()->condition('sd_folder',$folder)->condition('sd_pname',$prob)->condition('sd_section',$section);
 			$query = db_select('system_descriptions','sh')
 					->fields('sh',array('sd_name','sd_path','sd_type'))
@@ -72,13 +50,10 @@ function takeAction($case=" "){
 			print_r(json_encode($desc_list));	
 			break;
 
-		case "nameDuplication":
+		case "name_duplication":
 			//checks if system description name is duplicate
-			$prob = $_REQUEST['p'];
-			$section = $_REQUEST['s'];
-			$folder = $_REQUEST['f'];
-			$sysName = $_REQUEST['n'];
-			$cond = db_and()->condition('sd_folder',$folder)->condition('sd_name',$sysName)->condition('sd_section',$section)->condition('sd_pname', $prob);
+			$sys_name = isset($_REQUEST['n'])?$_REQUEST['n']:null;
+			$cond = db_and()->condition('sd_folder',$folder)->condition('sd_name',$sys_name)->condition('sd_section',$section)->condition('sd_pname', $prob);
 			$check_q = db_select('system_descriptions','sh')->fields('sh',array('sd_name'))->condition($cond)->execute();
 			//$check_q = "select * from folders where folder_id='$folder_id'";
 			$row_count = $check_q->rowCount();
@@ -89,18 +64,16 @@ function takeAction($case=" "){
 				echo 1;
 			break;
 
-		case "deleteSysDesc":
+		case "delete_sys_desc":
 			//deletes the system description
-			$path = $_REQUEST['path'];
-			echo $path;
+			$path = isset($_REQUEST['path'])?$_REQUEST['path']:null;
 			$query = db_delete('system_descriptions')->condition('sd_path', $path)->execute();
 			if($query){
 				echo "success";
 				//delete the file in uploads directory
 				unlink("../uploads/".$path);
-			}
-				else
-					echo "fail";
+			}else
+				echo "fail";
 			break;	
 	}
 }		

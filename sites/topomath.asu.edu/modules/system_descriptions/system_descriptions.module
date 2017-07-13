@@ -21,38 +21,7 @@ function system_descriptions_form_alter(&$form, &$form_state, $form_id){
 /* creates additional blocks which are specific to topomath in context of system descriptions*/
 
 function createSpecificBlocks(){
-	$specific_blocks = '<div id="handleSystemDesc" class="modal fade" role="dialog">
-								<div class="modal-dialog">
-								<!-- Modal content-->
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title">View/Edit/Delete descriptions</h4>
-											<button type="button" class="close" data-dismiss="modal">&times;</button>   
-											</div>
-										<div class="modal-body">
-											<div id="list-sys-descriptions">
-											
-											</div>
-											<div id="sysDesc-error-box" style="color: red">
-											</div>
-											<div class="progress">
-												<div class="progress-bar" role="progressbar"></div>
-											</div>
-											<div id="sys-desc-inputs">
-											<input id="upload-input" type="file" name="uploads"></br>
-											<button id="add-desc-text" class="btn btn-lg upload-btn2">Add Description</button>
-												<button class="btn btn-lg upload-btn" type="button">Upload File</button>
-												</form> 
-											</div>
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-default" data-dismiss="modal" id="">Done</button>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div id="confirmRemoveSysDesc" class="modal fade" role="dialog">
+	$specific_blocks = '<div id="confirmRemoveSysDesc" class="modal fade" role="dialog">
 								<div class="modal-dialog">
 								<!-- Modal content-->
 									<div class="modal-content">
@@ -129,6 +98,9 @@ function system_descriptions_block_info(){
 	$blocks['edit_system_descriptions'] = array(
 		'info' => 'Block for editing system descriptions',
 	);
+	$blocks[''] = array(
+		'info' => 'Block for '
+	);
 	return $blocks;
 }
 
@@ -153,9 +125,9 @@ function system_descriptions_block_view($delta = ""){
 	}
 
 	$edit_desc = isset($_REQUEST['edit'])?true:false;
-	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/ckeditor.js');
-	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/adapters/jquery.js');
-	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/manage_ck.js');
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/ckeditor.js', array('weight' => 100) );
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/ckeditor/adapters/jquery.js', array('weight' => 200));
+	drupal_add_js(drupal_get_path('module', 'system_descriptions').'/cke/manage_ck.js', array('weight' => 300));
 	
 	switch ($delta){
 		case "new_system_descriptions":

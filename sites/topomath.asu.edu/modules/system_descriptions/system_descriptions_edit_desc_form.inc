@@ -1,7 +1,8 @@
 <?php
 function system_descriptions_edit_desc_form($form, &$form_state){
 	
-	$sd_path = drupal_get_path('module', 'system_descriptions').'/uploads/'.$_REQUEST['sdp'];
+	$sd_name = isset($_REQUEST['sdp'])?$_REQUEST['sdp']:null;
+	$sd_path = drupal_get_path('module', 'system_descriptions').'/uploads/'.$sd_name;
 	if(file_exists($sd_path)){
 		$fc = file_get_contents($sd_path);
 
@@ -54,7 +55,7 @@ else{
 }
 
 function system_descriptions_edit_desc_form_validate($form, &$form_state){
-	$sd_path = $_REQUEST['sdp'];
+	$sd_path = isset($_REQUEST['sdp'])?$_REQUEST['sdp']:null;
 	form_set_value($form['problem_path'], $sd_path, $form_state);
 }
 
@@ -64,15 +65,15 @@ function system_descriptions_edit_desc_form_submit($form, &$form_state){
 	   content in file */
 
 	$content = $form_state['values']['sd_edit_content'];
-	$path = $_REQUEST['sdp'];
+	$path = isset($_REQUEST['sdp'])?$_REQUEST['sdp']:null;
 	$file = drupal_get_path('module', 'system_descriptions').'/uploads/'.$path;
 	file_put_contents($file, $content);
 	$form_state['redirect'] = array(
 				'sysdescs',
 				array(
-    				'query' => array(
-      					'msg' => 'edited',
-    				),
+					'query' => array(
+						'msg' => 'edited',
+					),
 				),
 			);	
 

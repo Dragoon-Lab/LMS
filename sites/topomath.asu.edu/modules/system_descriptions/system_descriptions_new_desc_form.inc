@@ -67,10 +67,10 @@ function system_descriptions_new_desc_form($form, &$form_state){
 }
 
 function system_descriptions_new_desc_form_validate($form, &$form_state){
-	$pname = $_REQUEST['p'];
-	$fname = $_REQUEST['f'];
-	$sname = $_REQUEST['s'];
-	$uname = $_REQUEST['u'];
+	$pname = isset($_REQUEST['p'])?$_REQUEST['p']:null;
+	$fname = isset($_REQUEST['f'])?$_REQUEST['f']:null;
+	$sname = isset($_REQUEST['s'])?$_REQUEST['s']:null;
+	$uname = isset($_REQUEST['u'])?$_REQUEST['u']:null;
 	$name = $form_state['values']['file_name_html'];
 	$cond = db_and()->condition('sd_folder',$fname)->condition('sd_name',$name)->condition('sd_section',$sname)->condition('sd_pname', $pname);
 	$check_q = db_select('system_descriptions','sh')->fields('sh',array('sd_name'))->condition($cond)->execute();
@@ -118,9 +118,9 @@ function system_descriptions_new_desc_form_submit($form, &$form_state){
 			$form_state['redirect'] = array(
 				'sysdescs',
 				array(
-    				'query' => array(
-      					'msg' => 'added',
-    				),
+					'query' => array(
+						'msg' => 'added',
+					),
 				),
 			);	
 }
