@@ -14,8 +14,11 @@ jQuery(document).ready(function($) {
 		$('input[type=radio]#edit-m-coachedaconstruction').prop('checked',true);
 
 		//model library problems should not have group "g" set, so remove the element from the form
+		//same applies to "f" which depicts group(folder) incase of topomath
 		var form = document.forms['dragoon_problem_form'];
 		if(form["g"] != undefined)
+			form["g"].remove();
+		if(form["f"] != undefined)
 			form["g"].remove();
 		//also make sure other fields like section are set to default values
 		form["s"].value = "public-login";
@@ -156,6 +159,16 @@ jQuery(document).ready(function($) {
 		var hiddenGroupField = document.createElement("input");
 		hiddenGroupField.setAttribute("type", "hidden");
 		hiddenGroupField.setAttribute("name", "g");
+		hiddenGroupField.setAttribute("value", group_name);
+		form.appendChild(hiddenGroupField);
+		
+		//same applies to "f" param which indicats group(or folder) in case of topomath
+		if(form["f"] != undefined){
+			form["f"].remove();
+		}
+		var hiddenGroupField = document.createElement("input");
+		hiddenGroupField.setAttribute("type", "hidden");
+		hiddenGroupField.setAttribute("name", "f");
 		hiddenGroupField.setAttribute("value", group_name);
 		form.appendChild(hiddenGroupField);
 	});

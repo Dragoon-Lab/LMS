@@ -1,0 +1,7 @@
+name = System Description Loader
+description = helps loading system descriptions for non class models
+core = 7.x
+package = Model Blocks
+version = "7.x-0.1"
+core = "7.x"
+dependencies[] = url_dragoon
