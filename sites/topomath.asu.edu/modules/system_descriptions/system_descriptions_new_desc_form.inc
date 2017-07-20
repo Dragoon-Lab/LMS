@@ -111,6 +111,8 @@ function system_descriptions_new_desc_form_submit($form, &$form_state){
 			if($save_file){
 
 				$file = drupal_get_path('module', 'system_descriptions').'/uploads/'.$path;
+				global $no_cache_tag;
+				$content = $no_cache_tag.$content;
 				file_put_contents($file, $content, FILE_APPEND | LOCK_EX);
 				echo "file save success!";
 			}
