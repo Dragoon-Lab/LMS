@@ -19,7 +19,9 @@ jQuery(document).ready(function($) {
 		if(form["g"] != undefined)
 			form["g"].remove();
 		if(form["f"] != undefined)
-			form["g"].remove();
+			form["f"].remove();
+		//model library problems will not have system descriptions button
+		$('#open_sysdescmodal').hide();
 		//also make sure other fields like section are set to default values
 		form["s"].value = "public-login";
 		if(event.data.hasOwnProperty("update") && event.data.update == true){
@@ -109,6 +111,8 @@ jQuery(document).ready(function($) {
 
 	$('.dragoon_nc_problem').click(function(){
 		var form = document.forms['dragoon_problem_form'];
+		//non class models should have have system descriptions button
+		$('#open_sysdescmodal').show();
 		var user = form["u"].value;
 		var prob_name = $(this).text();
 		if(prob_name != "No models"){
