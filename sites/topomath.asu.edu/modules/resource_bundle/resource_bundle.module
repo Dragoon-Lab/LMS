@@ -15,17 +15,11 @@ function get_problem_open_options(){
 	if(!isset($options)){
 		$options = array(
 			'#options' => array(
-//				'STUDENT&a=executionDemo' => t('Step through running the model'),
-//				'STUDENT&a=execution' => t('Run the model manually'),
-//				'COACHED&a=construction' => t('Reconstruct the model - Feedback on everything'),
-//				'STUDENT&a=construction' => t('Reconstruct the model - Feedback on entries and graphs'),
-//				'TEST&a=construction' => t('Reconstruct the model - Feedback on graphs only'),
-//				'EDITOR&a=construction' => t('Reconstruct the model - No feedback'),
+				'STUDENT&a=construction' => t('Reconstruct the model - Feedback on entries and graphs'),
 				'AUTHOR&a=construction' => t('Edit the model'),
 			),
 			'#title' => t('Select a method to start TopoMath problem'),
 			'#default_value' => 'AUTHOR&a=construction'
-//			'#default_value' => 'COACHED&a=construction'
 		);
 	}
 
