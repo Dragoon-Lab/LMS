@@ -280,7 +280,7 @@ function get_enrolled_users_table($params){
 	while($row = $results->fetchAssoc()){
 		if($row['code'] == $params['code']){
 			$u = user_load($row['uid']);
-			$data[$index++] = array($u->name, $u->field_first_name['und'][0]['safe_value'], $u->field_last_name['und'][0]['safe_value'], $u->mail);
+			$data[$index++] = array($u->name, field_get_items('user',$u,'field_first_name'), field_get_items('user',$u,'field_last_name'), $u->mail);
 		}
 	}
 
