@@ -67,6 +67,8 @@ function system_descriptions_edit_desc_form_submit($form, &$form_state){
 	$content = $form_state['values']['sd_edit_content'];
 	$path = isset($_REQUEST['sdp'])?$_REQUEST['sdp']:null;
 	$file = drupal_get_path('module', 'system_descriptions').'/uploads/'.$path;
+	global $no_cache_tag;
+	$content = $no_cache_tag.$content;
 	file_put_contents($file, $content);
 	$form_state['redirect'] = array(
 				'sysdescs',

@@ -303,9 +303,9 @@ function forms_user_login(&$edit, $action){
 }
 
 function forms_user_validation_reg(&$form, &$form_state) {
-	$is_teacher = $form_state['values']['field_request_teacher_account']['und'][0]['value'];
-	$acad_inst = $form_state['values']['field_academic_institution']['und'][0]['value'];
+	$is_teacher = $form_state['values']['field_request_teacher_account_']['und'][0]['value'];
+	$acad_inst = $form_state['values']['field_academic_institution_']['und'][0]['value'];
 	if($is_teacher && $acad_inst == ""){
-		form_set_error('field_academic_institution', t('Please enter your academic institution.'));
+		form_set_error('field_academic_institution_', t('Please enter your academic institution.'));
 	}
 }

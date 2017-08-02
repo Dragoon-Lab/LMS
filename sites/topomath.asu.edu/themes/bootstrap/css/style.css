@@ -115,7 +115,7 @@
     z-index: 9999;
 }
 #confirmRemoveSysDesc{
-    z-index: 9999;
+    z-index: 999999;
 }
 #confirmModelCopy{
     z-index: 9999;
@@ -173,4 +173,9 @@ table.formatted_table{
 }
 #list-sys-descriptions{
     margin-bottom: 20px;
+}
+#popup_blocker_alert_msg{
+    margin-top: 10px;
+    color: red;
+    font-size: 13px;
 }

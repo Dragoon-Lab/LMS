@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
 		//hide the author mode radio and by default check student mode/immediate feedback mode
 		$('input[type=radio]#edit-m-authoraconstruction').closest('div').hide();
 		//by default check the student mode
-		$('input[type=radio]#edit-m-coachedaconstruction').prop('checked',true);
+		$('input[type=radio]#edit-m-studentaconstruction').prop('checked',true);
 
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
@@ -19,7 +19,9 @@ jQuery(document).ready(function($) {
 		if(form["g"] != undefined)
 			form["g"].remove();
 		if(form["f"] != undefined)
-			form["g"].remove();
+			form["f"].remove();
+		//model library problems will not have system descriptions button
+		$('#open_sysdescmodal').hide();
 		//also make sure other fields like section are set to default values
 		form["s"].value = "public-login";
 		if(event.data.hasOwnProperty("update") && event.data.update == true){
@@ -109,6 +111,8 @@ jQuery(document).ready(function($) {
 
 	$('.dragoon_nc_problem').click(function(){
 		var form = document.forms['dragoon_problem_form'];
+		//non class models should have have system descriptions button
+		$('#open_sysdescmodal').show();
 		var user = form["u"].value;
 		var prob_name = $(this).text();
 		if(prob_name != "No models"){
@@ -150,7 +154,10 @@ jQuery(document).ready(function($) {
 		form["pname"].value = prob_name;
 		form["p"].value = prob_name;
 		form["s"].value = "non-class-models";
+		//in case author mode radio button is hidden, it has to be shown
 		$('input[type=radio]#edit-m-authoraconstruction').closest('div').show();
+		//author mode has to be the default value in case of non class models
+		$('input[type=radio]#edit-m-authoraconstruction').prop('checked',true);
 		// add "g" to the form as the public library models wont have a g in the form them selves, g indicates group
 		//check if g is defined already and remove it from form before appending a new value
 		if(form["g"] != undefined){
