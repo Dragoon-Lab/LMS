@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
 			var new_group = $('select[name=authorAssignSave]').val();
 			var prob = form["p"].value;
 			var user = form["u"].value;
-			var copy_sec = form["s"].value;
+			var copy_sec = "non-class-models";
 			//copy a model to the new group before opening it
 			//send an ajax request to the dragoon API to perform this copy
 
@@ -55,6 +55,11 @@ jQuery(document).ready(function($) {
 		});	
 		}
 		form["g"].value = $('select[name=authorAssignSave]').val();
+		//f parameter is for topomath
+		//TODO: a permanent solution for the use of different parameters
+		form["f"].value = $('select[name=authorAssignSave]').val();
+		//assignment problem has to be opened for authoring (as teacher wants this to be authoring assignment) in user selected folder and his non-class-models section
+		form["s"].value = "non-class-models";
 		console.log(form);
 		form.submit();
 	});

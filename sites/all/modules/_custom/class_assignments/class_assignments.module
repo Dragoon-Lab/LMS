@@ -106,7 +106,7 @@ function class_assignments_handle_assignment($code){
 				$addGroup = "";
 				if(isset($props["g"]) && $props["g"] != ""){
 					$grp = $props["g"];
-					$addGroup = "<input type='hidden' name='g' value='$grp'>";
+					$addGroup = "<input type='hidden' name='g' value='$grp'><input type='hidden' name='f' value='$grp'>";
 				}
 
 
