@@ -29,7 +29,7 @@ function forms_nc_delete_folder_form($form, &$form_state){
     );
 	$form['submit_button'] = array(
 		'#type' => 'submit',
-		'#value' => t('Delete folder'),
+		'#value' => t('Delete Items'),
 		'#id' => 'delete_nc_folder',
 	);
 

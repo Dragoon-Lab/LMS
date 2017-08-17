@@ -107,7 +107,7 @@ function get_classes_table_html($delta = '', $params){
 			}
 			$a = t($row['name']);
 			$b = $created_users[$row['created_by']];
-			$c = '<a href = "'.$serverURL.'log/dashboard.php?t=lms-leader&s='.$row['section'].'" title = "Check Your Progress" target="_blank" style = "cursor: hand; cursor: pointer; pointer-events: none">Check</a>';
+			$c = '<a href = "'.$serverURL.'log/dashboard.php?t=lms-leader&s='.$row['section'].'" title = "Check Your Progress" target="_blank" style = "cursor: hand; cursor: pointer; pointer-events: none">Coming Soon</a>';
 			$data[$index++] = array($a, $b, $c);
 		}
 	}
