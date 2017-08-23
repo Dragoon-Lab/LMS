@@ -59,6 +59,7 @@ jQuery(document).ready(function($) {
 		form.setAttribute("method", "POST");
 		form["g"].value = $('#create_model_folder_name').val();
 		form["f"].value = form["g"].value;
+		form["z"].value = "";
 		form.submit();
 		setTimeout(function(){
 			location.reload();
