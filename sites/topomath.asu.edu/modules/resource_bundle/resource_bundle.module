@@ -17,6 +17,7 @@ function get_problem_open_options(){
 			'#options' => array(
 				'STUDENT&a=construction' => t('Reconstruct the model - Feedback on entries and graphs'),
 				'AUTHOR&a=construction' => t('Edit the model'),
+				'NOFEEDBACK&a=construction' => t('Reconstruct the model - No feedback')
 			),
 			'#title' => t('Select a method to start TopoMath problem'),
 			'#default_value' => 'AUTHOR&a=construction'
