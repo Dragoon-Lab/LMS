@@ -27,6 +27,7 @@ function create_assignment_form($form, &$form_state){
 		'#options' => array(
 			'STUDENT|construction' => t('Reconstruct the model - Feedback on entries and graphs'),
 			'AUTHOR|construction' => t('Edit the model'),
+			'NOFEEDBACK|construction' => t('Reconstruct the model - No feedback')
 		),
 		'#title' => t('Select a method to start Dragoon problem'),
 		'#required' => TRUE,
