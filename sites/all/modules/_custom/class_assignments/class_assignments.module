@@ -97,7 +97,7 @@ function class_assignments_handle_assignment($code){
 				//if a non author mode forwards to dragoon tutor
 
 				$props = json_decode($cc_d['problem_properties'],true);
-				$prob = $props["p"];
+				$prob = htmlentities($props["p"],ENT_QUOTES);
 				$mode = $props["m"];
 				$activ = $props["a"];
 				$sm = $props["sm"];
@@ -108,7 +108,6 @@ function class_assignments_handle_assignment($code){
 					$grp = $props["g"];
 					$addGroup = "<input type='hidden' name='g' value='$grp'><input type='hidden' name='f' value='$grp'>";
 				}
-
 
 				$echo = "<div id='messageReader'>Creating Problem</div>
 							<form id='nonAuthData'>
