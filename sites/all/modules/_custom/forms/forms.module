@@ -298,6 +298,10 @@ function forms_form_alter(&$form, &$form_state, $form_id){
 	}
 }
 
+function forms_init(){
+	drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_common_functions.js');
+}
+
 function forms_user_login(&$edit, $action){
 	$edit['redirect'] = $GLOBALS['base_url'];
 }
