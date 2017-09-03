@@ -118,7 +118,7 @@
 .clear{clear: both;}
 .block-title{margin-top:20px !important;}
 .element-hide{ display: none; }
-#rename_label,#ren_model_label,#ren_folder_label{ display: none; }
+#new_name_label,#ren_model_label,#ren_folder_label{ display: none; }
 
 table.formatted_table{
 	    border-collapse: collapse;
