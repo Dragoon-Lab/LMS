@@ -1,5 +1,7 @@
 jQuery(document).ready(function($) {
-
+	//maximum length of model name
+	var max_model_len = 50;
+	
 	$('#create_nc_model').click(function(e){
 		e.preventDefault();
 		// make sure folder name is not empty and also the folder with same name exists
@@ -10,12 +12,21 @@ jQuery(document).ready(function($) {
 	});
 
 	function checkValidity(model_name,owner){
-		//empty case
-		if(model_name == ''){
-			//
-			console.log("problem name is empty");
-			$('#create_model_pname').addClass('focusedtextselect');
-			$('#create_model_pname').attr("placeholder","Model Name can not be empty");
+		//empty value case
+		if(isNameEmpty(model_name)){
+			showErrorTextbox("create_model_pname","Empty value");
+			return;
+		}
+
+		//length exceeded case
+		if(lengthExceeded(model_name,max_model_len)){
+			showErrorTextbox("create_model_pname","maximum length exceeded");
+			return;
+		}
+
+		//special characters case
+		if(checkSpecialChars(model_name)){
+			showErrorTextbox("create_model_pname","special characters not allowed");
 			return;
 		}
 
@@ -68,9 +79,7 @@ jQuery(document).ready(function($) {
 
 	var reportDupModels = function(model_name){
 		console.log("problem name is duplicate");
-		$('#create_model_pname').addClass('focusedtextselect');
-		$('#create_model_pname').val('');
-		$('#create_model_pname').attr("placeholder",model_name+" already exists");
+		showErrorTextbox("create_model_pname",model_name+ " already exists");
 		throw new duplicateModelException("duplicate model");
 
 	}
