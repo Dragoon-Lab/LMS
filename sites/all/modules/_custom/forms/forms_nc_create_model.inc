@@ -25,7 +25,8 @@ function forms_nc_create_model_form($form, &$form_state){
 		'#type' => 'textfield',
 		'#prefix' => '<div class="alert alert-info">Maximum 50 characters, Allowed special chars: underscore, dot and single quote</div>',
 		'#title' => t('Model Name'),
-		'#id' => 'create_model_pname'
+		'#id' => 'create_model_pname',
+		'#maxlength' => 50
 	);
 
 	$form['m'] = array(

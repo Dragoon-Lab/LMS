@@ -11,7 +11,8 @@ function forms_nc_class_folder_form($form, &$form_state){
 		'#prefix' => '<div class="alert alert-info">Maximum 35 characters, Allowed special chars: underscore, dot and single quote</div>',
 		'#title' => t('New Folder Name'),
 		'#required' => TRUE,
-		'#id' => 'create_folder_fname'
+		'#id' => 'create_folder_fname',
+		'#maxlength' => 35,
 	);
 
 	$form['owner'] = array(

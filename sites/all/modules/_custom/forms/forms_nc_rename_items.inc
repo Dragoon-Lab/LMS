@@ -66,7 +66,8 @@ function forms_nc_rename_items($form, &$form_state){
 		'#prefix' => '<div id="new_name_label"><b>Choose New Name</b></div>',
 		'#attributes' => array(
 			'class' => array('element-hide')
-		)
+		),
+		'#maxlength' => 35
 	);
 
 	$form['u_ren'] = array(

@@ -39,6 +39,7 @@ jQuery(document).ready(function($) {
 			original_model.hide();
 			//hide model label
 			$('#ren_model_label').hide();
+			new_name.attr('maxlength',max_folder_name_len);
 		}
 		else if(inp == "Model"){
 			var shared_folders = form["user_shared_folders"].value;
@@ -53,6 +54,7 @@ jQuery(document).ready(function($) {
 			new_name.show();
 			//show model label
 			$('#ren_model_label').show();
+			new_name.attr('maxlength',max_model_name_len);
 		}
 	});
 
@@ -119,20 +121,9 @@ jQuery(document).ready(function($) {
 			return;
 		}
 
-		var max_len;
 		var to_change = $("input[name='choose_item_rename']:checked").val();
-		//check if lengths are in limit
+		//lengths limit handled with maxlength attr
 		
-		if(to_change === "Folder")
-			max_len = max_folder_name_len;
-		if(to_change === "Model")
-			max_len = max_model_name_len;
-
-		if(lengthExceeded(new_val,max_len)){
-			showErrorTextbox("new_item_name","maximum length exceeded");
-			return;
-		}
-
 		//special characters case
 		if(checkSpecialChars(new_val)){
 			showErrorTextbox("new_item_name","special characters not allowed");

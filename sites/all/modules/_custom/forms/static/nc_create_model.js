@@ -18,11 +18,7 @@ jQuery(document).ready(function($) {
 			return;
 		}
 
-		//length exceeded case
-		if(lengthExceeded(model_name,max_model_len)){
-			showErrorTextbox("create_model_pname","maximum length exceeded");
-			return;
-		}
+		//length exceeded case handled with maxlength attribute
 
 		//special characters case
 		if(checkSpecialChars(model_name)){

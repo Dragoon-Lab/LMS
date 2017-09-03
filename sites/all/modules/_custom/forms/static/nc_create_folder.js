@@ -1,7 +1,4 @@
 jQuery(document).ready(function($) {
-	//maximum length of folder name
-	var max_folder_len = 35;
-
 	$('#create_nc_folder').click(function(e){
 		e.preventDefault();
 		// make sure folder name is not empty and also the folder with same name exists
@@ -18,11 +15,7 @@ jQuery(document).ready(function($) {
 			return;
 		}
 
-		//length exceeded case
-		if(lengthExceeded(folder_name,max_folder_len)){
-			showErrorTextbox("create_folder_fname","maximum length exceeded");
-			return;
-		}
+		//length exceeded case handled with maxlength attribute
 
 		//special characters case
 		if(checkSpecialChars(folder_name)){
