@@ -52,6 +52,12 @@ function NC_models_schema(){
 			),
 		),
 		'primary key' => array('folder_id'),
+		'foreign keys' => array(
+			'user_constraint' => array(
+				'table' => 'users',
+				'columns' => array('owner' => 'name'),
+			),
+		),
 		'unique keys' => array(
 			'folder_owner' => array('folder_id', 'owner'),
 			'folder_id-name' => array('folder_id', 'folder_name')
@@ -92,6 +98,16 @@ function NC_models_schema(){
 			),
 		),
 		'primary key' => array('shared_id'),
+		'foreign keys' => array(
+			'folder_constraint' => array(
+				'table' => 'folders',
+				'columns' => array('folder_id' => 'folder_id'),
+			),
+			'user_constraint' => array(
+				'table' => 'users',
+				'columns' => array('member_name' => 'name'),
+			),
+		),
 	);
 	return $schema;
 }
