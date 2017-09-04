@@ -7,6 +7,8 @@ jQuery(document).ready(function($) {
 	var rename_button = $('#rename_item_button');
 	var form = document.forms['dragoon_nc_rename_items'];
 	var user_name = form["u_ren"].value;
+	var max_model_name_len = 50;
+	var max_folder_name_len = 35;
 
 	//First Event
 	//User will make a choice about what he wants to rename
@@ -14,7 +16,7 @@ jQuery(document).ready(function($) {
 
 	item_to_rename.on("change",function(){
 		//show folder label and hide model label
-		$('#ren_folder_label').show(); $('#rename_label').show();
+		$('#ren_folder_label').show(); $('#new_name_label').show();
 		//show rename button
 		rename_button.show();
 		original_folder.find('option').remove();
@@ -37,6 +39,7 @@ jQuery(document).ready(function($) {
 			original_model.hide();
 			//hide model label
 			$('#ren_model_label').hide();
+			new_name.attr('maxlength',max_folder_name_len);
 		}
 		else if(inp == "Model"){
 			var shared_folders = form["user_shared_folders"].value;
@@ -51,6 +54,7 @@ jQuery(document).ready(function($) {
 			new_name.show();
 			//show model label
 			$('#ren_model_label').show();
+			new_name.attr('maxlength',max_model_name_len);
 		}
 	});
 
@@ -110,24 +114,23 @@ jQuery(document).ready(function($) {
 	rename_button.on("click",function(e){
 		e.preventDefault();
 		var new_val = new_name.val();
-		//check if the new name is empty and if so alert
 
-		if(new_val == ""){
-			$('#rename_label').append('<b style="color: red">  New name cannot be empty !</b>');
+		//check if the new name is empty and if so alert
+		if(isNameEmpty(new_val)){
+			showErrorTextbox("new_item_name","Empty value");
 			return;
 		}
 
-		var orig_fol_name = original_folder.val();
 		var to_change = $("input[name='choose_item_rename']:checked").val();
-
-		if(to_change == "Folder"){
-			var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/);
-			if (pattern.test(new_val)) {
-				$('#rename_label').append('<b style="color: red">  New Folder name cannot contain special characters !</b>');
-				//alert("Please only use standard alphanumerics");
-				return;
-			}
+		//lengths limit handled with maxlength attr
+		
+		//special characters case
+		if(checkSpecialChars(new_val)){
+			showErrorTextbox("new_item_name","special characters not allowed");
+			return;
 		}
+			
+		var orig_fol_name = original_folder.val();
 
 		if(to_change == "Folder"){
 			//step 1 : update local folder names
@@ -138,13 +141,13 @@ jQuery(document).ready(function($) {
 				data: {'old_folder_id': orig_fol_name, 'new_folder_id': new_val+"-"+user_name, 'new_folder_name': new_val, 'req_type': 'renameFolder'},
 				success: function (data) {
 					console.log(data);
+					//step 2 : update all group names on dragoon
 					renameAction("Folder");
 				},
 				error: function (data) {
 					console.log("fail");
 				}
 			});
-			//step 2 : update all group names on dragoon
 		}
 		else if(to_change == "Model"){
 			//update only problem names on dragoon where folder name is the given
@@ -209,4 +212,5 @@ jQuery(document).ready(function($) {
 			}
 		});
 	};
+
 });

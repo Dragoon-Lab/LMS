@@ -88,6 +88,9 @@ function forms_block_view($delta = ''){
 			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_create_folder.js');
 			//$block_form['content'] = drupal_get_form('forms_nc_class_folder_form');
 			$form = drupal_get_form('forms_nc_class_folder_form');
+			$form['#attached']['js'] = array(
+				$path.'/static/nc_common_functions.js',
+			);
 			$block_form['title'] = t("Create Folder");
 			$block_form['content'] = array(
 				'#markup' => drupal_render($form),
@@ -121,6 +124,9 @@ function forms_block_view($delta = ''){
 			module_load_include('inc','forms', 'forms_nc_create_model');
 			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_create_model.js');
 			$form = drupal_get_form('forms_nc_create_model_form');
+			$form['#attached']['js'] = array(
+				$path.'/static/nc_common_functions.js',
+			);
 			$block_form['title'] = t('Create Model');
 			//$block_form['content'] = drupal_get_form('forms_nc_create_model_form');
 			$block_form['content'] = array(
@@ -185,6 +191,9 @@ function forms_block_view($delta = ''){
 		case "rename_items":
 			module_load_include('inc','forms','forms_nc_rename_items');
 			$form = drupal_get_form('forms_nc_rename_items');
+			$form['#attached']['js'] = array(
+				$path.'/static/nc_common_functions.js',
+			);
 			$block_form['title'] = t('Rename Items');
 			//$block_form['content'] = drupal_get_form('forms_nc_sharing');
 			$block_form['content'] = array(
