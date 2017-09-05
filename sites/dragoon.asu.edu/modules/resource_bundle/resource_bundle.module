@@ -36,16 +36,16 @@ function get_create_assignment_options(){
 	if(!isset($options)){
 		$options = array(
 			'#options' => array(
-				'STUDENT|a=executionDemo' => t('Step through running the model'),
-				'STUDENT|a=execution' => t('Run the model manually'),
-				'COACHED|a=construction' => t('Reconstruct the model - Feedback on everything'),
-				'STUDENT|a=construction' => t('Reconstruct the model - Feedback on entries and graphs'),
-				'TEST|a=construction' => t('Reconstruct the model - Feedback on graphs only'),
-				'EDITOR|a=construction' => t('Reconstruct the model - No feedback'),
-				'AUTHOR|a=construction' => t('Edit the model'),
+				'STUDENT|executionDemo' => t('Step through running the model'),
+				'STUDENT|execution' => t('Run the model manually'),
+				'COACHED|construction' => t('Reconstruct the model - Feedback on everything'),
+				'STUDENT|construction' => t('Reconstruct the model - Feedback on entries and graphs'),
+				'TEST|construction' => t('Reconstruct the model - Feedback on graphs only'),
+				'EDITOR|construction' => t('Reconstruct the model - No feedback'),
+				'AUTHOR|construction' => t('Edit the model'),
 			),
 			'#title' => t('Select a method to start Dragoon problem'),
-			'#default_value' => 'COACHED|a=construction'
+			'#default_value' => 'COACHED|construction'
 		);
 	}
 
