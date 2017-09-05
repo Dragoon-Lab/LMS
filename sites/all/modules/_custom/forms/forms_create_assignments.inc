@@ -24,15 +24,13 @@ function create_assignment_form($form, &$form_state){
 
 	$form['m'] = array(
 		'#type' => 'radios',
-		'#options' => array(
-			'STUDENT|construction' => t('Reconstruct the model - Feedback on entries and graphs'),
-			'AUTHOR|construction' => t('Edit the model'),
-			'NOFEEDBACK|construction' => t('Reconstruct the model - No feedback')
-		),
-		'#title' => t('Select a method to start Dragoon problem'),
 		'#required' => TRUE,
-		'#default_value' => 'STUDENT|construction',
 	);
+
+	$mode_options = get_create_assignment_options();
+	foreach($mode_options as $option => $value){
+		$form['m'][$option] = $value;
+	}
 
 	$form['p'] = array(
 		'#type' => 'hidden',
