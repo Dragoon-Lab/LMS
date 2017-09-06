@@ -8,7 +8,7 @@ jQuery(document).ready(function($) {
 	var form = document.forms['dragoon_nc_rename_items'];
 	var user_name = form["u_ren"].value;
 	var max_model_name_len = 50;
-	var max_folder_name_len = 35;
+	var max_folder_name_len = 33;
 
 	//First Event
 	//User will make a choice about what he wants to rename
