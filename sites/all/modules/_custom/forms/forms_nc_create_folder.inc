@@ -8,11 +8,11 @@ function forms_nc_class_folder_form($form, &$form_state){
 
 	$form['folder_name'] = array(
 		'#type' => 'textfield',
-		'#prefix' => '<div class="alert alert-info">Maximum 35 characters, Allowed special chars: underscore, dot and single quote</div>',
+		'#prefix' => '<div class="alert alert-info">Maximum 33 characters, Allowed special chars: underscore, dot and single quote</div>',
 		'#title' => t('New Folder Name'),
 		'#required' => TRUE,
 		'#id' => 'create_folder_fname',
-		'#maxlength' => 35,
+		'#maxlength' => 33,
 	);
 
 	$form['owner'] = array(
