@@ -97,7 +97,7 @@ function class_assignments_handle_assignment($code){
 				//if a non author mode forwards to dragoon tutor
 
 				$props = json_decode($cc_d['problem_properties'],true);
-				$prob = $props["p"];
+				$prob = htmlentities($props["p"],ENT_QUOTES);
 				$mode = $props["m"];
 				$activ = $props["a"];
 				$sm = $props["sm"];
@@ -106,9 +106,8 @@ function class_assignments_handle_assignment($code){
 				$addGroup = "";
 				if(isset($props["g"]) && $props["g"] != ""){
 					$grp = $props["g"];
-					$addGroup = "<input type='hidden' name='g' value='$grp'>";
+					$addGroup = "<input type='hidden' name='g' value='$grp'><input type='hidden' name='f' value='$grp'>";
 				}
-
 
 				$echo = "<div id='messageReader'>Creating Problem</div>
 							<form id='nonAuthData'>
@@ -280,15 +279,23 @@ function get_enrolled_users_table($params){
 	while($row = $results->fetchAssoc()){
 		if($row['code'] == $params['code']){
 			$u = user_load($row['uid']);
-			$data[$index++] = array($u->name, $u->field_first_name['und'][0]['safe_value'], $u->field_last_name['und'][0]['safe_value'], $u->mail);
+			$fname = get_user_fields($u,'field_first_name');
+			$lname = get_user_fields($u,'field_last_name');
+			$data[$index++] = array($u->name, $fname, $lname, $u->mail);
 		}
 	}
 
 	return create_table_html($params['titles'], $data);
 }
+
+function get_user_fields($user,$field){
+	$item_arr = field_get_items('user',$user,$field);
+	return $item_arr[0]['value'];
+}
+
 function get_text($section){
 	$url = get_path();
 	$url = $url['url']."/log/dashboard.php?t=lms-dashboard&s=".$section;
-	$html = "<p>To create a new problem, find the model you want to use in the menu below and click on it.  Fill out the form that appears and the problem link will then be added to that class's page.</p><p>You can copy the link and send it to your students using your preferred channel of communication, and they can click it to begin the assignment.  Note: this website does not send the link to the students.  You must send it to them or they will not see it.</p><p>To view the students work:<ol><li>If the problem mode was 'edit the model', ask the student to put it in a shared folder for you to view.</li><li>Otherwise, you can view their progress by clicking the 'dashboard' button.</li></ol></p><div class = 'right'><a href = '$url' title = \"Check Student's Progress\" target = '_blank'><input class = 'btn btn-success btn-md' type = 'submit' value = 'Open Dashboard'/></a></div><div class = 'clear'></div>";
+	$html = "<p>To create a new problem, find the model you want to use in the menu below and click on it.  Fill out the form that appears and the problem link will then be added to that class's page.</p><p>You can copy the link and send it to your students using your preferred channel of communication, and they can click it to begin the assignment.  Note: this website does not send the link to the students.  You must send it to them or they will not see it.</p><p>To view the students work:<ol><li>If the problem mode was 'edit the model', ask the student to put it in a shared folder for you to view.</li><li>Otherwise, you can view their progress by clicking the 'dashboard' button.</li></ol></p><div class = 'right'><a href = '$url' title = \"Check Student's Progress\" target = '_blank'><input class = 'btn btn-success btn-md' type = 'button' value = 'Open Dashboard'/></a></div><div class = 'clear'></div>";
 	return $html;
 }

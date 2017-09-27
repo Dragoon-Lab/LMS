@@ -100,6 +100,7 @@ function problem_form($form, &$form_state){
 		'#type' => 'submit',
 		'#value' => t('Open Problem'),
 		'#id' => 'submit_button',
+		'#suffix' => "<div id='popup_blocker_alert_msg'>If the problem does not open, check to see if your browser's pop-up blocker has blocked it</div>"
 	);
 
 	return $form;

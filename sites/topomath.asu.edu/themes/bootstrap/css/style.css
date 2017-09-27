@@ -115,7 +115,7 @@
     z-index: 9999;
 }
 #confirmRemoveSysDesc{
-    z-index: 9999999;
+    z-index: 999999;
 }
 #confirmModelCopy{
     z-index: 9999;
@@ -133,7 +133,7 @@
 .clear{clear: both;}
 .block-title{margin-top: 3px !important;}
 .element-hide{ display: none; }
-#rename_label,#ren_model_label,#ren_folder_label{ display: none; }
+#new_name_label,#ren_model_label,#ren_folder_label{ display: none; }
 
 table.formatted_table{
 	    border-collapse: collapse;
@@ -173,4 +173,9 @@ table.formatted_table{
 }
 #list-sys-descriptions{
     margin-bottom: 20px;
+}
+#popup_blocker_alert_msg{
+    margin-top: 10px;
+    color: red;
+    font-size: 13px;
 }

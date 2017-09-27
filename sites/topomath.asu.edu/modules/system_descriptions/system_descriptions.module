@@ -1,5 +1,8 @@
 <?php
 
+global $no_cache_tag;
+$no_cache_tag = '<meta http-equiv="cache-control" content="no-cache" />';
+
 function system_descriptions_form_alter(&$form, &$form_state, $form_id){
 	switch($form_id){ 
 		case "problem_form": //adds the system description button with weight -5 so that it appears just after the

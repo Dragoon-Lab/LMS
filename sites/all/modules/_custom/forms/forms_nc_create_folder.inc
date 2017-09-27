@@ -6,11 +6,13 @@ function forms_nc_class_folder_form($form, &$form_state){
 		$user_name = $user->name;
 	}
 
+	
 	$form['folder_name'] = array(
 		'#type' => 'textfield',
+		'#prefix' => '<div class="alert alert-info" id="form_valid_ack">Maximum 33 characters, Allowed special chars: underscore, dot and single quote</div>',
 		'#title' => t('New Folder Name'),
-		'#required' => TRUE,
-		'#id' => 'create_folder_fname'
+		'#id' => 'create_folder_fname',
+		'#maxlength' => 33,
 	);
 
 	$form['owner'] = array(
@@ -40,9 +42,10 @@ function forms_nc_class_folder_form($form, &$form_state){
 		'#id' => 'create_nc_folder',
 		'#ajax' => array(
 			'callback' => 'ajax_create_folder_callback',
-			'wrapper' => 'block-forms-create-non-class-folder',
-			'method' => 'html',
-			'effect' => 'fade'
+			'wrapper' => 'form_valid_ack',
+			'method' => 'append',
+			'effect' => 'fade',
+			'event' => 'createFolderEvent'
 		),
 	);
 	$form['cancel_button'] = array(
