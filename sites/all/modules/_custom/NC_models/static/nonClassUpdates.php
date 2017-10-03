@@ -13,28 +13,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 	function takeAction($case=" "){
 
 		switch ($case) {
-			case "create Folder":
-				$owner = $_REQUEST["owner"];
-				$folder = $_REQUEST["folder_name"];
-				//indicates whether the folder is a non class folder or a class related folder
-				//type 0 indicates a non class folder
-				$type=0;
-				$folder_id = $folder."-".$owner;
-				$folder_class_id = $_REQUEST["class-id"];
-				//current status indicates if the folder is shared or not, for private
-				$current_status = $_REQUEST["sharing_status"];
-				$q_res = $query=db_insert('folders')
-				->fields(array(
-					'folder_id' => ''.$folder_id,
-					'folder_name' => ''.$folder,
-					'owner' => ''.$owner,
-					'folder_type' => ''.$type,
-					'folder_class_id' => ''.$folder_class_id,
-					'current_status' => ''.$current_status,
-				))->execute();
-				return $q_res;
-				break;
-				
+
 			case "delete Folder":
 				$owner = $_REQUEST["owner"];
 				$del_folders = array();
@@ -101,18 +80,6 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 						))->execute();
 					//$mem_q= "insert into shared_members(member_name,folder_id,member_relation) values('$user_name','$folder',0)";
 				}
-				break;
-
-			case "check Folder":
-				$folder_id = $_REQUEST['folder_id'];
-				$check_q = db_select('folders','f')->fields('f',array('folder_id'))->condition('folder_id',$folder_id)->execute();
-				//$check_q = "select * from folders where folder_id='$folder_id'";
-				$row_count = $check_q->rowCount();
-				//$row_count = $check_q_res->num_rows;
-				if($row_count>0)
-					echo "already exists";
-				else
-					echo 1;
 				break;
 
 			case "deleteShareHolder":

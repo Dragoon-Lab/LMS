@@ -318,3 +318,55 @@ function forms_user_validation_reg(&$form, &$form_state) {
 		form_set_error('field_academic_institution_', t('Please enter your academic institution.'));
 	}
 }
+
+function ajax_create_folder_callback($form, &$form_state){
+	$folder = $form_state['values']['folder_name'];
+	
+	//check if the new folder is empty
+	if($folder == ""){
+		form_set_error('folder_name',t('Folder name cannot be empty'));
+		return $form;
+	}
+
+	//check if the name contains special characters
+	if(preg_match('/[#$%^&*()+=\-\[\]\';,.\/{}|":<>?~\\\\]/', $folder)){
+		form_set_error('folder_name', t('Folder name cannot contain special characters'));
+		return $form;
+	}
+	
+	//check for duplicate folder name
+	//folder_id is used to check for duplicacy and is a combination of folder name and owner
+	$owner = $form_state['values']['owner'];
+	$folder_id = $folder."-".$owner;
+	$check_q = db_select('folders','f')->fields('f',array('folder_id'))->condition('folder_id',$folder_id)->execute();
+	$row_count = $check_q->rowCount();
+	if($row_count>0){
+		form_set_error('folder_name', t('A folder with given name already exists'));
+		return $form;
+	}
+
+	//type 0 indicates a non class folder
+	$type=0;
+	$folder_class_id = $form_state['values']['class-id'];
+	//current status indicates if the folder is shared or not, for private
+	$current_status = $form_state['values']['sharing_status'];
+	try {
+		$q_res = $query=db_insert('folders')
+				->fields(array(
+					'folder_id' => ''.$folder_id,
+					'folder_name' => ''.$folder,
+					'owner' => ''.$owner,
+					'folder_type' => ''.$type,
+					'folder_class_id' => ''.$folder_class_id,
+					'current_status' => ''.$current_status,
+				))->execute();
+  		// No exception thrown; further instruct to reload page
+		$commands[] = array('command' => 'reloadPage');
+		return array('#type' => 'ajax', '#commands' => $commands);
+	}
+	catch (PDOException $e) {
+  		// Query failed;
+  		return "Something went wrong! please try again";
+	}
+}
+
