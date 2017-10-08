@@ -71,3 +71,51 @@ function ajax_create_folder_callback($form, &$form_state){
 		return $error;
 	}
 }
+
+function ajax_copy_model_callback($form, $form_state){
+	$action = $form_state['values']['cp_button'];
+	$result = send_mvcp_request($form, $form_state, $action);
+	if(trim($result) != "success"){
+		return t("Something went wrong, please try refreshing");
+	}
+	$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function ajax_move_model_callback($form, $form_state){
+	$action = $form_state['values']['mv_button'];
+	$result = send_mvcp_request($form, $form_state, $action);
+	if(trim($result) != "success"){
+		return t("Something went wrong, please try refreshing");
+	}
+	$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function send_mvcp_request($form, $form_state, $action){
+	$url = get_path()['url'].'/global.php';
+	$src = $form_state['values']['source_folder'];
+	$mod = $form_state['values']['source_model'];
+	$dest = $form_state['values']['destination_folder'];
+	$action = $action;
+	$user = $form_state['values']['u'];
+	$data = array(
+				't' => "modelAction",
+				'action' => $action,
+				'src' => $src,
+				'mod' => $mod,
+				'dest' => $dest,
+				'user' => $user,
+				'section' => "non-class-models"
+			);
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}

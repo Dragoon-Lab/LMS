@@ -198,8 +198,8 @@ function loadUserFolders($user_name)
 
 function loadUserFolders2($user_name)
 {
-	//prepare all user folders which the user owns
-	// return an array
+	//prepare all user folders which the user owns and is shared
+	//return an array
 
 	$query=db_select('folders','f');
 	$query->fields('f',array('folder_id','folder_name'));
