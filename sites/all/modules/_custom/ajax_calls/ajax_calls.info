@@ -1,0 +1,6 @@
+name = ajax calls module
+description = Contains general function calls for all drupal ajax calls made for LMS
+package = LMS
+core = 7.x
+version = "7.x-0.1"
+core = "7.x"

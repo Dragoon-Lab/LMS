@@ -1,0 +1,73 @@
+<?php
+
+function check_folder_duplicate($folder_id){
+
+	$ret_dat = array('is_duplicate' => NULL, 'exception' => NULL);
+		
+	try {
+		$row_count = db_select('folders')->condition('folder_id', $folder_id)->countQuery()->execute()->fetchField();
+		if($row_count>0){
+			$ret_dat['is_duplicate'] = true;
+		}
+		return $ret_dat;
+	}
+
+	catch(Exception $e) {
+		//Something went wrong with select query
+		$ret_dat['exception'] = true;
+		watchdog_exception('folder_dup_check', $e);
+		return $ret_dat;
+	}
+}
+
+function ajax_create_folder_callback($form, &$form_state){
+	$folder = $form_state['values']['folder_name'];
+	
+	//check for duplicate folder name
+	//folder_id is used to check for duplicacy and is a combination of folder name and owner
+	$owner = $form_state['values']['owner'];
+	$folder_id = $folder."-".$owner;
+	$ret = check_folder_duplicate($folder_id);
+	if($ret['is_duplicate'] && !$ret['exception']){
+		$error = t('A folder with given name already exists');
+		return $error;
+	}
+	else if($ret['exception']){
+		$error = t('Failed!, please try again');
+		return $error;
+	}
+
+	// All precases have been passed, create folder next
+	// Type 0 indicates a non class folder
+	$type = 0;
+	$folder_class_id = $form_state['values']['class-id'];
+	//current status indicates if the folder is shared or not, for private
+	$current_status = $form_state['values']['sharing_status'];
+	try {
+		//db_insert function should be specified a return option for the count of rows inserted 
+		//will be returned (if not we use this option execute() returns auto inc field or undefined if the auto inc is not present)
+		$insert_count = db_insert('folders',array('return' => Database::RETURN_AFFECTED))
+				->fields(array(
+					'folder_id' => ''.$folder_id,
+					'folder_name' => ''.$folder,
+					'owner' => ''.$owner,
+					'folder_type' => ''.$type,
+					'folder_class_id' => ''.$folder_class_id,
+					'current_status' => ''.$current_status,
+				))->execute();
+		
+		if($insert_count != 1){
+			//either throw exception or set error because insert has not shown desired affect
+			$error = t('Failed!, please try again');
+			return $error;
+		}
+		
+		$commands[] = array('command' => 'reloadPage');
+		return array('#type' => 'ajax', '#commands' => $commands);
+	}
+	catch (Exception $e) {
+		// Query failed;
+		$error = t('Failed!, please try again');
+		return $error;
+	}
+}
