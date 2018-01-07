@@ -9,8 +9,9 @@ function forms_nc_move_models($form, &$form_state){
     }
 
     //call a function which returns all potential folders user model can be created in
-    $user_folders = loadUserFolders($name);
-    $user_folders2 = json_encode(loadUserFolders2($name));
+    $user_det = array('uid' => $user->uid, 'uname' => $user->name);
+    $user_folders = loadUserFolders($user_det);
+    $user_folders2 = json_encode(loadUserFolders2($user_det));
     $form['source_folder'] = array(
         //pump folder options including the user personal folder
         '#type' => 'select',

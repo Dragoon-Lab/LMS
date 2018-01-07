@@ -11,7 +11,8 @@ function forms_nc_sharing($form, &$form_state){
     }
 
     //call a function which returns all potential folders user model can be created in
-    $user_folders = loadUserFolders($name);
+    $user_det = array('uid' => $user->uid, 'uname' => $user->name);
+    $user_folders = loadUserFolders($user_det);
     unset($user_folders[$name . "-private"]);
     $form['select_folder'] = array(
         //pump folder options including the user personal folder

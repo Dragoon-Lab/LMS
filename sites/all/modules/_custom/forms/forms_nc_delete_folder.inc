@@ -6,8 +6,8 @@ function forms_nc_delete_folder_form($form, &$form_state){
 		$user_name = $user->name;
 	}
     //load private and shared folders
-
-    $json = loadNCModels($user_name,1);
+    $user_det = array('uid' => $user->uid, 'uname' => $user->name);
+    $json = loadNCModels($user_det,1);
     $data = json_decode($json, true);
 
     forms_show_del_tree($data,$form, 'none');

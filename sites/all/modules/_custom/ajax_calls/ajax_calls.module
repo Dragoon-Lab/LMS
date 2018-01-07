@@ -26,6 +26,7 @@ function ajax_create_folder_callback($form, &$form_state){
 	//check for duplicate folder name
 	//folder_id is used to check for duplicacy and is a combination of folder name and owner
 	$owner = $form_state['values']['owner'];
+	$uid = $form_state['values']['owner_id'];
 	$folder_id = $folder."-".$owner;
 	$ret = check_folder_duplicate($folder_id);
 	if($ret['is_duplicate'] && !$ret['exception']){
@@ -50,9 +51,9 @@ function ajax_create_folder_callback($form, &$form_state){
 				->fields(array(
 					'folder_id' => ''.$folder_id,
 					'folder_name' => ''.$folder,
-					'owner' => ''.$owner,
+					'uid' => ''.$uid,
 					'folder_type' => ''.$type,
-					'folder_class_id' => ''.$folder_class_id,
+					'class_code' => ''.$folder_class_id,
 					'current_status' => ''.$current_status,
 				))->execute();
 		
@@ -67,7 +68,7 @@ function ajax_create_folder_callback($form, &$form_state){
 	}
 	catch (Exception $e) {
 		// Query failed;
-		$error = t('Failed!, please try again');
+		$error = t('Failed!, please try again'. $e->getMessage());
 		return $error;
 	}
 }

@@ -3,6 +3,7 @@ function forms_nc_class_folder_form($form, &$form_state){
 	global $user;
 	$user_name = 'anonymous';
 	if($user->uid){
+		$user_id = $user->uid;
 		$user_name = $user->name;
 	}
 
@@ -18,6 +19,11 @@ function forms_nc_class_folder_form($form, &$form_state){
 		'#type' => 'hidden',
 		'#value' => $user_name,
 		'#id' => 'create_folder_owner'
+	);
+
+	$form['owner_id'] = array(
+		'#type' => 'hidden',
+		'#value' => $user_id,
 	);
 
 	$form['class-id'] = array(
