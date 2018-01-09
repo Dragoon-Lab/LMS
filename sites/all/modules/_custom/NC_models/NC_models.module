@@ -178,101 +178,99 @@
 		return $common_blocks;
 	}
 
-function loadUserFolders($user_det)
-{
-	//prepare all user folders which the user owns
-	// return an array
-	$user_id = $user_det['uid'];
-	$user_name = $user_det['uname'];
-	$query=db_select('folders','f');
-	$query->fields('f',array('folder_id','folder_name'));
-	$query->condition('uid',$user_id);
-	$q_res = $query->execute();
-	//create an array with default first element as user private folder with id
-	$user_folders = array();
-	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
-	while ($res = $q_res->fetchAssoc()) {
-		$group = $res['folder_id'];
-		$grp_name = $res['folder_name'];
-		$user_folders[$group] = $grp_name;
-	}
-	return $user_folders;
-}
-
-
-function loadUserFolders2($user_det)
-{
-	//prepare all user folders which the user owns
-	// return an array
-	$user_id = $user_det['uid'];
-	$user_name = $user_det['uname'];
-	$query=db_select('folders','f');
-	$query->fields('f',array('folder_id','folder_name'));
-	$query->condition('uid',$user_id);
-	$q_res = $query->execute();
-	//create an array with default first element as user private folder with id
-	$user_folders = array();
-	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
-	while ($res = $q_res->fetchAssoc()) {
-		$group = $res['folder_id'];
-		$grp_name = $res['folder_name'];
-		$user_folders[$group] = $grp_name;
-	}
-	$query2 = db_select('shared_members','sh');
-	$query2->fields('sh',array('folder_num'));
-	$query2->condition('uid',$user_id);
-	$q_res2 = $query2->execute();
-	while($res2 = $q_res2->fetchAssoc()){
-
-		$fol_num = $res2['folder_num'];
-		$get_fol_id = db_select('folders','f');
-		$get_fol_id->fields('f',array('folder_id'));
-		$get_fol_id->condition('folder_num',$fol_num);
-		$get_fol_id_res = $get_fol_id->execute();
-		$fol_id = $get_fol_id_res->fetchAssoc();
-		$folder_id = $fol_id['folder_id'];
-		$group2 = $folder_id;
-		if(!isset($user_folders[$group2])){
-			$folder_name = explode("-",$group2);
-			$folder_name = $folder_name[0];
-			$user_folders[$group2] = $folder_name;
+	function loadUserFolders($user_det)
+	{
+		//prepare all user folders which the user owns
+		// return an array
+		$user_id = $user_det['uid'];
+		$user_name = $user_det['uname'];
+		$query=db_select('folders','f');
+		$query->fields('f',array('folder_id','folder_name'));
+		$query->condition('uid',$user_id);
+		$q_res = $query->execute();
+		//create an array with default first element as user private folder with id
+		$user_folders = array();
+		$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+		while ($res = $q_res->fetchAssoc()) {
+			$group = $res['folder_id'];
+			$grp_name = $res['folder_name'];
+			$user_folders[$group] = $grp_name;
 		}
+		return $user_folders;
 	}
-	return $user_folders;
-}
 
 
-function loadShareHolders($folder_name,$owner){
+	function loadUserFolders2($user_det)
+	{
+		//prepare all user folders which the user owns
+		// return an array
+		$user_id = $user_det['uid'];
+		$user_name = $user_det['uname'];
+		$query=db_select('folders','f');
+		$query->fields('f',array('folder_id','folder_name'));
+		$query->condition('uid',$user_id);
+		$q_res = $query->execute();
+		//create an array with default first element as user private folder with id
+		$user_folders = array();
+		$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+		while ($res = $q_res->fetchAssoc()) {
+			$group = $res['folder_id'];
+			$grp_name = $res['folder_name'];
+			$user_folders[$group] = $grp_name;
+		}
+		$query2 = db_select('shared_members','sh');
+		$query2->fields('sh',array('folder_num'));
+		$query2->condition('uid',$user_id);
+		$q_res2 = $query2->execute();
+		while($res2 = $q_res2->fetchAssoc()){
+			$fol_num = $res2['folder_num'];
+			$get_fol_id = db_select('folders','f');
+			$get_fol_id->fields('f',array('folder_id'));
+			$get_fol_id->condition('folder_num',$fol_num);
+			$get_fol_id_res = $get_fol_id->execute();
+			$fol_id = $get_fol_id_res->fetchAssoc();
+			$folder_id = $fol_id['folder_id'];
+			$group2 = $folder_id;
+			if(!isset($user_folders[$group2])){
+				$folder_name = explode("-",$group2);
+				$folder_name = $folder_name[0];
+				$user_folders[$group2] = $folder_name;
+			}
+		}
+		return $user_folders;
+	}
 
 
-	$folder_id = $folder_name."-".$owner;
+	function loadShareHolders($folder_name,$owner){
 
-	$fol_num_q = db_select('folders','f');
-	$fol_num_q->fields('f', array('folder_num'));
-	$fol_num_q->condition('folder_id',$folder_id);
-	$fol_num_res = $fol_num_q->execute();
-	$fol_num_ar = $fol_num_res->fetchAssoc();
-	$folder_num = $fol_num_ar['folder_num'];
-	$query = db_select('shared_members','sh')
-		->fields('sh',array('uid'))
-		->condition('folder_num',$folder_num)
-		->execute();
-	$shared_holders = '';
-	while($res = $query->fetchAssoc()){
-		$user = db_select('users','u')
-			->fields('u',array('mail','name'))
-			->condition('uid',$res['uid'])
+		//returns current folder shared users
+		$folder_id = $folder_name."-".$owner;
+		$fol_num_q = db_select('folders','f');
+		$fol_num_q->fields('f', array('folder_num'));
+		$fol_num_q->condition('folder_id',$folder_id);
+		$fol_num_res = $fol_num_q->execute();
+		$fol_num_ar = $fol_num_res->fetchAssoc();
+		$folder_num = $fol_num_ar['folder_num'];
+		$query = db_select('shared_members','sh')
+			->fields('sh',array('uid'))
+			->condition('folder_num',$folder_num)
 			->execute();
-		$username = $user->fetchAssoc();
-		$element = "
+		$shared_holders = '';
+		while($res = $query->fetchAssoc()){
+			$user = db_select('users','u')
+				->fields('u',array('mail','name'))
+				->condition('uid',$res['uid'])
+				->execute();
+			$username = $user->fetchAssoc();
+			$element = "
 					<tr class='eachSharedHolder'>
 					<td><div class='sharedUserContent'><span>".$username['name']."</span><br><span class='sharedHolderEmail'>".$username['mail']."</span></div></td>
 					<td><i class='glyphicon glyphicon-remove glyphShare' title='Unshare User' data-toggle='modal'></td>
 					</tr>";
-		$shared_holders = $shared_holders.$element;
+			$shared_holders = $shared_holders.$element;
+		}
+		return $shared_holders;
 	}
-	return $shared_holders;
-}
 
 
 
