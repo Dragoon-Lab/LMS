@@ -179,3 +179,6 @@ table.formatted_table{
     color: red;
     font-size: 13px;
 }
+#rename_model_check_div,#model_newname{
+    margin-bottom: 10px;
+}

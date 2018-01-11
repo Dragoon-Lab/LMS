@@ -9,8 +9,9 @@ function forms_nc_create_model_form($form, &$form_state){
 	}
 
 	//call a function which returns all potential folders user model can be created in
-	$user_folders = loadUserFolders($name);
-	$json = loadNCModels($name,1);
+	$user_det = array('uid' => $user->uid, 'uname' => $user->name);
+	$user_folders = loadUserFolders($user_det);
+	$json = loadNCModels($user_det,1);
 
 
 	$form['select_folder'] = array(

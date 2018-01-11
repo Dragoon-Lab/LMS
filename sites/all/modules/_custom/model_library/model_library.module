@@ -52,7 +52,8 @@ function model_library_block_view($delta = ""){
 				'otherTags' => 'class = "dragoon_nc_problem" data-toggle = "modal" data-target = "#dragoon_problem_wrapper"',
 			);
 			if(user_is_logged_in()) {
-				$json = loadNCModels($user->name,0);
+				$user_det = array('uid' => $user->uid, 'uname' => $user->name);
+				$json = loadNCModels($user_det,0);
 				$content = getHTMLStructure($json, $parameters);
 				if(arg(0) != "class"){
 					//specific blocks refer to site specific blocks(like system description specific blocks in case of topomath)

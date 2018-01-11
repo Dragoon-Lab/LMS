@@ -4,6 +4,10 @@
 			var model_select = $('#select_source_model');
 			var dest_select = $('#select_destination_folder');
 			var src_select = $('#select_source_folder');
+			var add_newname = $('#rename_model_check');
+			var add_newname_div = $('#rename_model_check_div');
+			var model_newname = $('#model_newname');
+			var model_newname_div = $('#model_newname_div');
 			var cp_button = $('#cp_model_but');
 			var mv_button = $('#mv_model_but');
 			var form = document.forms['dragoon_nc_move_models'];
@@ -50,9 +54,27 @@
 				//update dest select and disable
 				refresh_select(dest_select, message);
 				dest_select.attr("disabled",true);
-				
+
+				//disable new model name textfield
+				if(current_op == "Copy Models"){
+					add_newname_div.hide();
+					model_newname_div.hide();					
+				}
 				//disable copy/move button
 				current_button.attr("disabled", true);
+			}
+
+			//handle new name for models
+			//only for copy models case
+			var handle_model_name = function(same_folder){
+				add_newname_div.hide();
+				model_newname_div.hide();
+				if(same_folder){
+					model_newname_div.show();
+				}
+				else{
+					add_newname_div.show();
+				}
 			}
 
 			
@@ -104,7 +126,14 @@
 							//console.log(select_data, current_folder);
 							//update destination select with all source folders except current folder
 							refresh_select(dest_select, src_data);
-							dest_select.find('option[value='+current_folder+']').remove();
+							//if current option is move models, remove moving to same folder option
+							console.log("update mvcp options fired", current_op);
+							var dest_folder = dest_select.val();
+							if(current_op == "Move Models")
+								dest_select.find('option[value='+current_folder+']').remove();
+							else
+								//handle model new name
+								handle_model_name(current_folder == dest_folder); 
 							//enable the copy/move button
 							current_button.attr("disabled", false);
 						}
@@ -122,13 +151,40 @@
 			//modAction is the class attribute of move and copy model buttons
 			$('.modAction').on("click",function(){
 				console.log($(this).html());
-				var current_op = $(this).html();
+				current_op = $(this).html();
 				mvcp_form_setup(current_op);
 
 			});
 
 			$('#select_source_folder').on("change", function(){
 				update_mvcp_options(current_src_options);
+			});
+
+			dest_select.on("change", function(){
+				if(current_op == "Copy Models"){
+					var select_folder = src_select.val();
+					var dest_folder = dest_select.val();
+					handle_model_name(select_folder == dest_folder);
+				}
+
+			});
+
+			add_newname.on("change", function(){
+				model_newname_div.hide();
+				if(this.checked){
+					model_newname_div.show();
+				}
+			});
+
+			cp_button.on("click", function(e){
+				e.preventDefault();
+				if(model_newname.val() == "" && !(model_newname_div.css('display') == 'none')){
+					console.log("new name empty", add_newname.checked, model_newname.val());
+					showErrorTextbox("model_newname","Empty value");
+					return;
+				}
+				$(this).trigger('copy_authenticated');
+						
 			});
 
 		}

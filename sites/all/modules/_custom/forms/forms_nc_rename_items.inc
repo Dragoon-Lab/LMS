@@ -9,8 +9,9 @@ function forms_nc_rename_items($form, &$form_state){
 	}
 
 	//call a function which returns all potential folders user model can be created in
-	$user_folders = loadUserFolders($name);
-	$user_folders2 = json_encode(loadUserFolders2($name));
+	$user_det = array('uid' => $user->uid, 'uname' => $user->name);
+	$user_folders = loadUserFolders($user_det);
+	$user_folders2 = json_encode(loadUserFolders2($user_det));
 
 	$form['choose_item_rename'] = array(
 		'#type' => 'radios',

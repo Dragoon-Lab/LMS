@@ -7,8 +7,10 @@ function forms_nc_move_models($form, &$form_state){
 	}
 
 	//call a function which returns all potential folders user model can be created in
-	$user_folders = json_encode(loadUserFolders($name));
-	$user_folders2 = json_encode(loadUserFolders2($name));
+	$user_det = array('uid' => $user->uid, 'uname' => $user->name);
+	$user_folders = json_encode(loadUserFolders($user_det));
+
+	$user_folders2 = json_encode(loadUserFolders2($user_det));
 	
 	$form['source_folder'] = array(
 		'#type' => 'select',
@@ -55,21 +57,39 @@ function forms_nc_move_models($form, &$form_state){
 		'#id' => 'current_user_name'
 	);
 
+	$form['rename_check'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Use new name'),
+		'#id' => 'rename_model_check',
+		'#prefix' => '<div id="rename_model_check_div" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+
+	$form['model_newname'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Enter the new name of copy'),
+		'#id' => 'model_newname',
+		'#prefix' => '<div id="model_newname_div" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+
 	$form['cp_button'] = array(
 		'#type' => 'submit',
-		'#value' => t('copyModel'),
+		'#value' => t('Copy Model'),
 		'#id' => 'cp_model_but',
 		'#ajax' => array(
 			'callback' => 'ajax_copy_model_callback',
 			'wrapper' => 'message_div',
 			'method' => 'html',
-			'effect' => 'fade'
+			'effect' => 'fade',
+			'event' => 'copy_authenticated',
+			'wrapper' => 'message_div',
 		)
 	);
 
 	$form['mv_button'] = array(
 		'#type' => 'submit',
-		'#value' => t('moveModel'),
+		'#value' => t('Move Model'),
 		'#id' => 'mv_model_but',
 		'#ajax' => array(
 			'callback' => 'ajax_move_model_callback',

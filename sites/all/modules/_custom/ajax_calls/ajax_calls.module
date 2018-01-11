@@ -26,6 +26,7 @@ function ajax_create_folder_callback($form, &$form_state){
 	//check for duplicate folder name
 	//folder_id is used to check for duplicacy and is a combination of folder name and owner
 	$owner = $form_state['values']['owner'];
+	$uid = $form_state['values']['owner_id'];
 	$folder_id = $folder."-".$owner;
 	$ret = check_folder_duplicate($folder_id);
 	if($ret['is_duplicate'] && !$ret['exception']){
@@ -50,9 +51,9 @@ function ajax_create_folder_callback($form, &$form_state){
 				->fields(array(
 					'folder_id' => ''.$folder_id,
 					'folder_name' => ''.$folder,
-					'owner' => ''.$owner,
+					'uid' => ''.$uid,
 					'folder_type' => ''.$type,
-					'folder_class_id' => ''.$folder_class_id,
+					'class_code' => ''.$folder_class_id,
 					'current_status' => ''.$current_status,
 				))->execute();
 		
@@ -67,15 +68,15 @@ function ajax_create_folder_callback($form, &$form_state){
 	}
 	catch (Exception $e) {
 		// Query failed;
-		$error = t('Failed!, please try again');
+		$error = t('Failed!, please try again'. $e->getMessage());
 		return $error;
 	}
 }
 
 function ajax_copy_model_callback($form, $form_state){
-	$action = $form_state['values']['cp_button'];
-	$result = send_mvcp_request($form, $form_state, $action);
+	$result = send_mvcp_request($form, $form_state, "copyModel");
 	if(trim($result) != "success"){
+		return $result;
 		return t("Something went wrong, please try refreshing");
 	}
 	$commands[] = array('command' => 'reloadPage');
@@ -83,9 +84,9 @@ function ajax_copy_model_callback($form, $form_state){
 }
 
 function ajax_move_model_callback($form, $form_state){
-	$action = $form_state['values']['mv_button'];
-	$result = send_mvcp_request($form, $form_state, $action);
+	$result = send_mvcp_request($form, $form_state, "moveModel");
 	if(trim($result) != "success"){
+		return $result;
 		return t("Something went wrong, please try refreshing");
 	}
 	$commands[] = array('command' => 'reloadPage');
@@ -96,6 +97,7 @@ function send_mvcp_request($form, $form_state, $action){
 	$url = get_path()['url'].'/global.php';
 	$src = $form_state['values']['source_folder'];
 	$mod = $form_state['values']['source_model'];
+	$new_mod = $form_state['values']['model_newname'];
 	$dest = $form_state['values']['destination_folder'];
 	$action = $action;
 	$user = $form_state['values']['u'];
@@ -104,6 +106,7 @@ function send_mvcp_request($form, $form_state, $action){
 				'action' => $action,
 				'src' => $src,
 				'mod' => $mod,
+				'new_mod' => $new_mod,
 				'dest' => $dest,
 				'user' => $user,
 				'section' => "non-class-models"
