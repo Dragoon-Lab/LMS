@@ -1,7 +1,8 @@
 (function ($) {
 	Drupal.behaviors.validateCFForm = { 
 		attach: function (context ,settings) { 
-			var form = $("#dragoon_ncCFolder_form", context);
+			var form = $('#dragoon_ncCFolder_form', context);
+			var current_modal = $('#createFolderModal');
 			form.on('submit', function(e){
 					e.preventDefault();
 					// Run js based validations 
@@ -25,6 +26,12 @@
 					// this trigger makes an ajax call, verifies duplicate case and finally creates folder
 					$('#create_nc_folder').trigger('createFolderEvent');
 				});
+
+			current_modal.on('shown.bs.modal', function(){
+				//empty the create folder textbox
+				console.log('create folder modal opened')
+				emptyTextbox('create_folder_fname', 'Enter the folder name here');
+			});
 		}
 	}
 
