@@ -1,7 +1,6 @@
 jQuery(document).ready(function($) {
 	//maximum length of model name
 	var max_model_len = 50;
-	
 	$('#create_nc_model').click(function(e){
 		e.preventDefault();
 		// make sure folder name is not empty and also the folder with same name exists
@@ -9,6 +8,12 @@ jQuery(document).ready(function($) {
 		var owner=$('#dragoon_ncCModel_form input[name=u]').val();
 		console.log("form check parameters", model_name, owner);
 		checkValidity(model_name,owner);
+	});
+
+	$('#createModelModal').on('shown.bs.modal', function(){
+		//empty the create folder textbox
+		console.log('create model modal opened')
+		emptyTextbox('create_model_pname', 'Enter the model name here');
 	});
 
 	function checkValidity(model_name,owner){
