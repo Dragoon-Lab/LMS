@@ -38,7 +38,6 @@
 	//commands can be returned back from drupal code
 	Drupal.ajax.prototype.commands.reloadPage = function(){
 		//Print success message and reload page
-		$('#block-forms-create-non-class-folder').html('<b>Success!</b>');
 		setTimeout(function(){
 			location.reload();
 		},2000); 

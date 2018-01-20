@@ -105,6 +105,9 @@
 #confirmModelCopy{
     z-index: 9999;
 }
+#confirmDeleteModal{
+    z-index: 9999;
+}
 #alertDisabledSharing{
     z-index: 9999;   
 }

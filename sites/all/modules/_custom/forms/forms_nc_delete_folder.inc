@@ -18,19 +18,36 @@ function forms_nc_delete_folder_form($form, &$form_state){
 			'#markup' => '</div>'
 		);
 	}
+
+	$form['error_message_div'] = array(
+		'#markup' => "<div id='del_err_msg'></div>"
+	);
+
 	$form['owner'] = array(
 		'#type' => 'hidden',
 		'#value' => $user_name,
 		'#id' => "folder_owner"
 	);
-	$form['req_type'] = array(
+
+	$form['selected_folders'] = array(
 		'#type' => 'hidden',
-		'#value' => 'delete Folder',
 	);
+
+	$form['selected_models'] = array(
+		'#type' => 'hidden',
+	);	
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Delete Items'),
 		'#id' => 'delete_nc_folder',
+		'#ajax' => array(
+			'callback' => 'ajax_del_items',
+			'wrapper' => 'del_err_msg',
+			'method' => 'html',
+			'effect' => 'fade',
+			'event' => 'delete_items_auth'
+		)
 	);
 
 	$form['cancel_button'] = array(
