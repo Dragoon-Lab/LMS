@@ -231,9 +231,9 @@
 			$folder_id = $fol_id['folder_id'];
 			$group2 = $folder_id;
 			if(!isset($user_folders[$group2])){
-				$folder_name = explode("-",$group2);
-				$folder_name = $folder_name[0];
-				$user_folders[$group2] = $folder_name;
+				$folder_ar = explode("-",$group2);
+				$folder_name = $folder_ar[0];
+				$user_folders[$group2] = $folder_name. " by " . $folder_ar[1];
 			}
 		}
 		return $user_folders;

@@ -75,42 +75,64 @@ function ajax_create_folder_callback($form, &$form_state){
 
 function ajax_copy_model_callback($form, $form_state){
 	$result = send_mvcp_request($form, $form_state, "copyModel");
+	$ret_msg = "";
 	if(trim($result) != "success"){
 		return $result;
-		return t("Something went wrong, please try refreshing");
+		$ret_msg = $result;
 	}
-	$commands[] = array('command' => 'reloadPage');
+	$go_reload = true;	
+	$ret_msg = "Model copied successfully";
+	$commands[] = ajax_command_html('#block-forms-move-models', $ret_msg);
+	if($go_reload)
+		$commands[] = array('command' => 'reloadPage');
 	return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 function ajax_move_model_callback($form, $form_state){
 	$result = send_mvcp_request($form, $form_state, "moveModel");
+	$ret_msg = "";
 	if(trim($result) != "success"){
-		return $result;
-		return t("Something went wrong, please try refreshing");
+		$ret_msg = $result;
 	}
-	$commands[] = array('command' => 'reloadPage');
+	$go_reload = true;
+	$ret_msg = "Model moved successfully";
+	$commands[] = ajax_command_html('#block-forms-move-models', $ret_msg);
+	if($go_reload)
+		$commands[] = array('command' => 'reloadPage');
 	return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 function send_mvcp_request($form, $form_state, $action){
 	$url = get_path()['url'].'/global.php';
-	$src = $form_state['values']['source_folder'];
-	$mod = $form_state['values']['source_model'];
-	$new_mod = $form_state['values']['model_newname'];
-	$dest = $form_state['values']['destination_folder'];
-	$action = $action;
-	$user = $form_state['values']['u'];
+	$src = isset($form_state['values']['source_folder']) ? $form_state['values']['source_folder'] : null;
+	$mod = isset($form_state['values']['source_model']) ? $form_state['values']['source_model'] : null;
+	$dest = isset($form_state['values']['destination_folder']) ? $form_state['values']['destination_folder'] : null;
+
+	if(empty($src) || empty($mod) || empty($dest)){
+		return "Please make sure valid data is being moved or copied";
+	}
+
+	$user = isset($form_state['values']['u'])? $form_state['values']['u'] : null;
+	if(empty($user)){
+		return "Please login again and try";
+	}
 	$data = array(
-				't' => "modelAction",
-				'action' => $action,
-				'src' => $src,
-				'mod' => $mod,
-				'new_mod' => $new_mod,
-				'dest' => $dest,
-				'user' => $user,
-				'section' => "non-class-models"
-			);
+			't'=> 'modelAction', 
+			'action' => $action,
+			'src' => $src,
+			'mod' => $mod,
+			'dest' => $dest,
+			'user' => $user,
+			'section' => 'non-class-models'
+		);
+		//New model name case only originates when model is being copied
+	if($action == "copyModel"){
+		$new_mod = isset($form_state['values']['model_newname']) ? $form_state['values']['model_newname']: null;
+		if(is_null($new_mod))
+			return "Please make sure new model name is valid";
+		else
+			$data['new_mod'] = $new_mod;
+	}
 	$options = array(
 		'http' => array(
 			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
@@ -121,6 +143,7 @@ function send_mvcp_request($form, $form_state, $action){
 	$context  = stream_context_create($options);
 	$result = file_get_contents($url, false, $context);
 	return $result;
+
 }
 
 function ajax_del_items($form, $form_state){

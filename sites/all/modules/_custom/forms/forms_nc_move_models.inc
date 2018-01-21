@@ -69,6 +69,7 @@ function forms_nc_move_models($form, &$form_state){
 		'#type' => 'textfield',
 		'#title' => t('Enter the new name of copy'),
 		'#id' => 'model_newname',
+		'#maxlength' => 50,
 		'#prefix' => '<div id="model_newname_div" class="element-hide">',
 		'#suffix' => '</div>'
 	);

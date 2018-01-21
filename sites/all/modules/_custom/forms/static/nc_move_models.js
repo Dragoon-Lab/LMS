@@ -20,10 +20,14 @@
 			//updates button (move or copy) based on user choice
 			var update_button = function(src_button, enable){
 				cp_button.hide(); mv_button.hide();
-				if(src_button == "Copy Models")
+				if(src_button == "Copy Models"){
 					current_button = cp_button;
-				else if(src_button == "Move Models")
+				}
+				else if(src_button == "Move Models"){
 					current_button = mv_button;
+					add_newname_div.hide();
+					model_newname_div.hide();
+				}
 				current_button.show();
 				current_button.attr("disabled",true);
 			};
@@ -130,7 +134,7 @@
 							console.log("update mvcp options fired", current_op);
 							var dest_folder = dest_select.val();
 							if(current_op == "Move Models")
-								dest_select.find('option[value='+current_folder+']').remove();
+								dest_select.find('option[value="'+current_folder.trim()+'"]').remove();
 							else
 								//handle model new name
 								handle_model_name(current_folder == dest_folder); 
@@ -178,10 +182,19 @@
 
 			cp_button.on("click", function(e){
 				e.preventDefault();
-				if(model_newname.val() == "" && !(model_newname_div.css('display') == 'none')){
+				var model_name = model_newname.val();
+				if(model_name == "" && !(model_newname_div.css('display') == 'none')){
 					console.log("new name empty", add_newname.checked, model_newname.val());
 					showErrorTextbox("model_newname","Empty value");
 					return;
+				}
+				if(model_name != "" && !(model_newname_div.css('display') == 'none')){
+					//length exceeded case handled with maxlength attribute
+					//special characters case
+					if(checkSpecialChars(model_name)){
+						showErrorTextbox("model_newname","special characters not allowed");
+						return;
+					}
 				}
 				$(this).trigger('copy_authenticated');
 						
