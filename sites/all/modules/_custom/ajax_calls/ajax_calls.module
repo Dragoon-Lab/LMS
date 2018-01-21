@@ -146,6 +146,7 @@ function send_mvcp_request($form, $form_state, $action){
 
 }
 
+
 function ajax_del_items($form, $form_state){
 
 	$fol_ar = !empty(($form_state['values']['selected_folders']))? explode(",", $form_state['values']['selected_folders']): NULL;
@@ -257,6 +258,98 @@ function delete_folder_models($folder_id){
 function delete_specific_models($del_models){
 	$url = get_path()['url'].'/global.php';
 	$data = array('t' => 'deleteSpecificModels', 'dm' => $del_models);
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}
+
+
+// Rename module related calls
+function ajax_rename_item_callback($form, $form_state){
+	$action = isset($form_state['values']['choose_item_rename'])? $form_state['values']['choose_item_rename']: "";
+	$old_folder_id = isset($form_state['values']['select_folder_item'])? $form_state['values']['select_folder_item']: "";
+	$new_name = isset($form_state['values']['select_new_name']) ? $form_state['values']['select_new_name'] : "";
+	$user = isset($form_state['values']['u_ren'])? $form_state['values']['u_ren']: "";
+
+	if(empty($action) || empty($old_folder_id) || empty($new_name) || empty($user)){
+		return "Please make sure all the values given are valid and not empty";
+	}
+	$new_name_mod = $new_name."-".$user;
+	$data = array(
+		't' => 'renameItems',
+		'old_folder' => $old_folder_id,
+		'action' => $action,
+		'new_name' => $new_name_mod,
+	);
+	//check if user wants to rename a model
+	if($action == "Model"){
+		$model = isset($form_state['values']['select_model_item'])? $form_state['values']['select_model_item']: "";
+		if(empty($model))
+			return "Please enter a new valid model name";
+		$data['old_model'] = $model;
+		$data['new_name'] = $new_name;
+	}
+	// Two cases here
+	// case 1: user renames a folder, local db has to be updated before tutor sessions are updated with new name
+	// both updates have to be a logical unit, we use transactions for this purpose
+
+	// case 2: simply update a tutor db
+	$ret_msg = "";
+	$fol_err_msg = "<b>Folder rename failed</b><br/><i>Please make sure folder names are not redundant or duplicate values</i>";
+	$mod_err_msg = "<b>Model rename failed</b><br/><i>Please make sure folder names are not redundant or duplicate values</i>";
+	if($action == "Folder"){
+		//open a transaction
+		$trans = db_transaction();
+
+		try{
+			$update_count = db_update('folders')
+					->fields(array(
+						'folder_id' => $new_name_mod,
+						'folder_name' => $new_name,
+					))
+					->condition('folder_id',$old_folder_id)
+					->execute();
+			if($update_count != 1)
+				throw new Exception($fol_err_msg);
+			// now call for rename tutor
+			$res = rename_tutor_model($data);
+			if(trim($res) == "success"){
+				$ret_msg = "Folder renamed successfully";
+			}
+			else{
+				throw new Exception($fol_err_msg);
+			}
+		}
+		catch (Exception $e){
+			$trans->rollback();
+			watchdog_exception('rename failed : ', $e);
+			$ret_msg = $e->getMessage();
+		}
+	}
+	else{
+		$res = rename_tutor_model($data);
+		if(trim($res) == "success"){
+				$ret_msg = "Model renamed successfully";
+		}else{
+			$ret_msg = $mod_err_msg;
+		}
+	} 
+	//build rename data for tutor
+	$commands[] = ajax_command_html('#block-forms-rename-items', $ret_msg);
+	$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function rename_tutor_model($data){
+
+	$url = get_path()['url'].'/global.php';
 	$options = array(
 		'http' => array(
 			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",

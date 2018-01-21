@@ -185,3 +185,6 @@ table.formatted_table{
 #rename_model_check_div,#model_newname{
     margin-bottom: 10px;
 }
+.mt-10{
+    margin-top: 10px;
+}
