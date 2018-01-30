@@ -2,10 +2,8 @@
 function problem_form($form, &$form_state){
 	global $user;
 	$name = 'anonymous';
-	$rp = 'on';
 	if($user->uid){
 		$name = $user->name;
-		$rp = 'off';
 	}
 
 	$form['pname'] = array(
@@ -17,6 +15,7 @@ function problem_form($form, &$form_state){
 
 	$form['m'] = array(
 		'#type' => 'radios',
+		'#id' => 'form_open_radios',
 		'#required' => TRUE,
 		/*'#options' => array(
 			'STUDENT&a=executionDemo' => t('Step through running the model'),
@@ -93,7 +92,15 @@ function problem_form($form, &$form_state){
 
 	$form['rp'] = array(
 		'#type' => 'hidden',
-		'#value' => $rp,
+		'#value' => 'off',
+	);
+
+	$form['rp_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Restart problem'),
+		'#id' => 'rp_checkbox',
+		'#prefix' => '<div id="rp_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
 	);
 
 	$form['submit_button'] = array(
