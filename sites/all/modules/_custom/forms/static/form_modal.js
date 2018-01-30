@@ -4,7 +4,7 @@ jQuery(document).ready(function($) {
 	//to open specific problem, it has to be false in case of public models, private models but true in case of 
 	//shared models by other users
 	var should_check_share = false;
-
+	var form = document.forms['dragoon_problem_form'];
 	var showForm = function(/* object */ event){
 		var id = '#' + event.data.id;
 		should_check_share = false;
@@ -13,9 +13,11 @@ jQuery(document).ready(function($) {
 		//by default check the student mode
 		$('input[type=radio]#edit-m-studentaconstruction').prop('checked',true);
 
+		//model library problems should have restart problem enabled by default
+		enableRestart(true);
+
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
-		var form = document.forms['dragoon_problem_form'];
 		if(form["g"] != undefined)
 			form["g"].remove();
 		if(form["f"] != undefined)
@@ -38,8 +40,20 @@ jQuery(document).ready(function($) {
 		}
 	};
 
+	var enableRestart = function(/* status */ status){
+
+		if(status){
+			$('#rp_checkbox_container').show();
+		}
+		else{
+			$('#rp_checkbox_container').hide();
+		}
+		//by default each time restart is enabled or disabled, uncheck the box and also set form rp value to off
+		$('#rp_checkbox').prop('checked',false);
+		form['rp'].value = "off";
+	}
+
 	var submitProblemsForm = function(){
-		var form = document.forms['dragoon_problem_form'];
 		//before submission we need to perform a final sharing check just in case user has been disabled sharing after he has opened the dialog
 		console.log(should_check_share," should");
 		if(!should_check_share){
@@ -59,7 +73,6 @@ jQuery(document).ready(function($) {
 	};
 
 	var doSubmit = function(){
-		var form = document.forms['dragoon_problem_form'];
 		var date = Math.round(new Date().getTime()/1000);
 			if(form.u && form.u.value.indexOf("anon") >= 0)
 				form.u.value = "anon-"+ date.toString();
@@ -71,7 +84,6 @@ jQuery(document).ready(function($) {
 	};
 
 	var updateProblemsForm = function(/* object */ event){
-		var form = document.forms['dragoon_problem_form'];
 		var key = event.data.key;
 		var values = [$("#"+event.target.id).attr('value'), $("#" + event.target.id).attr('key')];
 		var keys = [];
@@ -110,7 +122,6 @@ jQuery(document).ready(function($) {
 	}, showForm);
 
 	$('.dragoon_nc_problem').click(function(){
-		var form = document.forms['dragoon_problem_form'];
 		//non class models should have have system descriptions button
 		$('#open_sysdescmodal').show();
 		var user = form["u"].value;
@@ -158,6 +169,8 @@ jQuery(document).ready(function($) {
 		$('input[type=radio]#edit-m-authoraconstruction').closest('div').show();
 		//author mode has to be the default value in case of non class models
 		$('input[type=radio]#edit-m-authoraconstruction').prop('checked',true);
+		//since default is author mode, restart problem should be hidden and disabled
+		enableRestart(false);
 		// add "g" to the form as the public library models wont have a g in the form them selves, g indicates group
 		//check if g is defined already and remove it from form before appending a new value
 		if(form["g"] != undefined){
@@ -185,5 +198,24 @@ jQuery(document).ready(function($) {
 		submit: true,
 		func: submitProblemsForm
 	}, hideForm);
+
+	$('#form_open_radios').change(function(){
+		var mode_val = $("input[type='radio'][name='m']:checked").val();
+		var mode_val_ar = mode_val.split("&");
+		var mode = mode_val_ar[0];
+		if(mode == "AUTHOR")
+			enableRestart(false);
+		else
+			enableRestart(true);
+	});
+
+	$('#rp_checkbox').change(function(){
+		var checked = $("input[name='rp_checkbox']:checked").val();
+		console.log("checked", checked);
+		if(checked)
+			form["rp"].value = 'on';
+		else
+			form["rp"].value = 'off';
+	});
 
 });
