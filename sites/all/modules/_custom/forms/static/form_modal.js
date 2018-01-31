@@ -55,15 +55,12 @@ jQuery(document).ready(function($) {
 
 	var submitProblemsForm = function(){
 		//before submission we need to perform a final sharing check just in case user has been disabled sharing after he has opened the dialog
-		console.log(should_check_share," should");
 		if(!should_check_share){
 			doSubmit();
 		}
 		else{
 			$.when(checkSharing(form["g"].value,form["u"].value)).done(function(share_check){
-				//console.log(typeof share_check, share_check);
 				if(share_check == '0'){
-					console.log("indicate lack of sharing");
 					$('#alertDisabledSharing').modal('show');
 					return;
 				} 
@@ -79,7 +76,6 @@ jQuery(document).ready(function($) {
 			form.setAttribute("action", $("#dragoon_url").val()+"index.php");
 			form.setAttribute("target", "_blank");
 			form.setAttribute("method", "POST");
-			console.log(form);
 			form.submit();
 	};
 
@@ -105,10 +101,10 @@ jQuery(document).ready(function($) {
 			url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
 			data: {'folder_id': folder_id, 'req_type': 'checkSharing', 'user': user},
 			success: function (data) {
-				console.log("success");
+				//console.log("success");
 			},
 			error: function (data) {
-				console.log("fail");
+				//console.log("fail");
 			}
 		});
 	};
@@ -128,7 +124,6 @@ jQuery(document).ready(function($) {
 		var prob_name = $(this).text();
 		if(prob_name != "No models"){
 			var group_name = $(this).closest('.accordion').find('h2:first').text();
-			console.log("gp name",group_name);
 			if(group_name == "private"){
 				group_name = user+"-private";
 				should_check_share = false;
@@ -137,14 +132,10 @@ jQuery(document).ready(function($) {
 				//group name might contain by keyword which indicates the actual owner
 				//if there is no by key word user himself is the owner
 				var local_shared_store = $('#local_shared_store').val();
-				//console.log("lss",local_shared_store);
 				var local_shared_arr = local_shared_store.split("&");
-				console.log(local_shared_arr);
 				var get_group_owner = [];
 				local_shared_arr.forEach(function(local_grp){
-					//console.log(local_grp);
 					if(local_grp!=""){
-						console.log(local_grp);
 						var local_grp_ar = local_grp.split("=");
 						get_group_owner[local_grp_ar[0].trim()] = local_grp_ar[1].trim();
 					}
@@ -154,7 +145,6 @@ jQuery(document).ready(function($) {
 					group_name = get_group_owner[group_name].trim();
 				else
 					group_name = group_name + "-" + user;
-				//console.log(group_name,our_ans);
 				var owner = group_name.split("-");
 				if(owner[1] == user)
 					should_check_share = false;
@@ -211,7 +201,6 @@ jQuery(document).ready(function($) {
 
 	$('#rp_checkbox').change(function(){
 		var checked = $("input[name='rp_checkbox']:checked").val();
-		console.log("checked", checked);
 		if(checked)
 			form["rp"].value = 'on';
 		else
