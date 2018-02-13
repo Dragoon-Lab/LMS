@@ -83,8 +83,19 @@
 	function sendGroup($g){
 		$url = get_path();
 		$url = $url['url'].'/global.php';
-		$data = array('t' => 'reqNonClassProblems', 'g' => $g);
+		//since this function returns models and LMS has provided users choice in ordering the models
+		global $user;
+		$user_id = $user->uid;
+		$mul_cond = db_and()->condition('up_name','list_model_order')->condition('uid',$user_id);
+		$sort_q = db_select('lms_user_preferences','up')
+					->fields('up', array('up_value'))
+					->condition($mul_cond)->execute();
+		$sort_res = $sort_q->fetchAssoc();
+		$sort = '0';
+		if($sort_res['up_value'] == "alphabetic")
+			$sort = '1';
 
+		$data = array('t' => 'reqNonClassProblems', 'g' => $g, 's' => $sort);
 		$options = array(
 			'http' => array(
 				'header'  => "Content-type: application/x-www-form-urlencoded\r\n",

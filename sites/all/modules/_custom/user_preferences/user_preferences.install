@@ -1,0 +1,81 @@
+<?php
+
+function user_preferences_schema(){
+	$schema = array();
+	$schema['lms_user_preferences'] = array(
+		'description' => 'Table to store user custom preferences',
+		'fields' => array(
+			'up_id' => array(
+				'type' => 'serial',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'user preferences serial number and primary key',
+			),
+
+			'up_name' => array(
+				'type' => 'varchar',
+				'length' => 150,
+				'not null' => TRUE,
+				'description' => 'name given to the user preference',
+			),
+
+			'up_type' => array(
+				'type' => 'varchar',
+				'length' => 100,
+				'not null' => TRUE,
+				'description' => 'type of the user preference',
+			),
+
+			'uid' => array(
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0,
+				'unsigned' => TRUE,
+				'description' => 'uid from users table represents whose system preference',
+			),
+
+			'up_value' =>  array(
+				'type' => 'varchar',
+				'length' => 150,
+				'not null' => TRUE,
+				'description' => 'value given to the user preference',
+			),
+
+			'last_updated' => array(
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+				'description' => 'time when user preference was last updated',
+			),
+
+		),
+		'primary key' => array('up_id'),
+		'foreign keys' => array(
+			'user_id' => array(
+				'table' => 'users',
+				'columns' => array('uid' => 'uid'),
+			),
+		),
+	);
+	return $schema;
+}
+
+function user_preferences_install(){
+	db_query('
+		ALTER TABLE {lms_user_preferences}
+		MODIFY last_updated TIMESTAMP NOT NULL
+		DEFAULT CURRENT_TIMESTAMP
+		ON UPDATE CURRENT_TIMESTAMP'
+	);
+	db_query('
+		ALTER TABLE {lms_user_preferences}
+		ADD CONSTRAINT {lms_user_preferences_owner_constraint}
+		FOREIGN KEY (uid) REFERENCES {users} (uid)
+		ON DELETE CASCADE
+	');	
+}
+
+function user_preferences_uninstall(){
+	db_query('
+		DROP TABLE lms_user_preferences;
+	');
+}
