@@ -103,7 +103,8 @@ function ajax_move_model_callback($form, $form_state){
 }
 
 function send_mvcp_request($form, $form_state, $action){
-	$url = get_path()['url'].'/global.php';
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
 	$src = isset($form_state['values']['source_folder']) ? $form_state['values']['source_folder'] : null;
 	$mod = isset($form_state['values']['source_model']) ? $form_state['values']['source_model'] : null;
 	$dest = isset($form_state['values']['destination_folder']) ? $form_state['values']['destination_folder'] : null;
@@ -241,7 +242,8 @@ function ajax_del_items($form, $form_state){
 }
 
 function delete_folder_models($folder_id){
-	$url = get_path()['url'].'/global.php';
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
 	$data = array('t'=> 'deleteFolderModels', 'fid' => $folder_id);
 	$options = array(
 		'http' => array(
@@ -256,7 +258,8 @@ function delete_folder_models($folder_id){
 }
 
 function delete_specific_models($del_models){
-	$url = get_path()['url'].'/global.php';
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
 	$data = array('t' => 'deleteSpecificModels', 'dm' => $del_models);
 	$options = array(
 		'http' => array(
@@ -349,7 +352,8 @@ function ajax_rename_item_callback($form, $form_state){
 
 function rename_tutor_model($data){
 
-	$url = get_path()['url'].'/global.php';
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
 	$options = array(
 		'http' => array(
 			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
