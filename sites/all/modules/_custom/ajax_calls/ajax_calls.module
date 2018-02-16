@@ -150,7 +150,7 @@ function send_mvcp_request($form, $form_state, $action){
 
 function ajax_del_items($form, $form_state){
 
-	$fol_ar = !empty(($form_state['values']['selected_folders']))? explode(",", $form_state['values']['selected_folders']): NULL;
+	$fol_ar = !empty($form_state['values']['selected_folders'])? explode(",", $form_state['values']['selected_folders']): NULL;
 	$mod_ar = !empty($form_state['values']['selected_models'])? json_decode($form_state['values']['selected_models'], TRUE): NULL;
 
 	//folder and models data are both in string format
