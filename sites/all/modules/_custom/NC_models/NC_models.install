@@ -55,6 +55,7 @@ function NC_models_schema(){
 			'created_time' => array(
 				'mysql_type' => 'DATETIME',
 				'not null' => TRUE,
+				'default' => 0,
 				'description' => 'time when folder was created',
 			),
 			'last_updated' => array(
@@ -132,11 +133,6 @@ function NC_models_schema(){
 function NC_models_install(){
 	db_query('
 		ALTER TABLE {folders}
-		MODIFY created_time TIMESTAMP NOT NULL
-		DEFAULT CURRENT_TIMESTAMP'
-	);
-	db_query('
-		ALTER TABLE {folders}
 		MODIFY last_updated TIMESTAMP NOT NULL
 		DEFAULT CURRENT_TIMESTAMP
 		ON UPDATE CURRENT_TIMESTAMP'
@@ -177,10 +173,9 @@ function NC_models_install(){
 
 function NC_models_uninstall(){
 	db_query('
-		DROP TABLE folders;
-	');
-
-	db_query('
 		DROP TABLE shared_members;
+	');
+	db_query('
+		DROP TABLE folders;
 	');
 }
