@@ -55,7 +55,6 @@ function NC_models_schema(){
 			'created_time' => array(
 				'mysql_type' => 'DATETIME',
 				'not null' => TRUE,
-				'default' => 0,
 				'description' => 'time when folder was created',
 			),
 			'last_updated' => array(
