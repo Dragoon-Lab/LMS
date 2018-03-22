@@ -12,7 +12,7 @@
 		var form = document.forms['create_assignment_form'];
 		if(form.create_session.value){
 			var g = form.g && form.g.value ? form.g.value : "";
-			var result = createSession(form.p.value, form.s.value, g);
+			var result = createSession(form.p.value, form.s.value, g, form.aname.value);
 			form.create_session.value += result;
 		}
 
@@ -36,7 +36,7 @@
 		}
 	};
 
-	var createSession = function(p, s, g){
+	var createSession = function(p, s, g, aname){
 		var u = $("#userName").val();
 		//var url = "http://localhost/code/global.php";
 		var url = $("#dragoon_url").val()+"global.php";
@@ -46,6 +46,7 @@
 			data: {
 				'u': u,
 				'p': p,
+				'aname' : aname,
 				's': s,
 				'g': g,
 				't': "copyNCModelToSection"

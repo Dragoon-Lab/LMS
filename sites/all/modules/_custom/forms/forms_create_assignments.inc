@@ -85,7 +85,7 @@ function create_assignment_form_submit($form, &$form_state){
 	unset($params['form_token']);
 	unset($params['form_id']);
 	unset($params['op']);
-
+	$params['p'] = $form_state['values']['aname'];
 	echo $form_state['values']['pname'];
 	$params = json_encode($params);
 	echo $params;
@@ -97,7 +97,7 @@ function create_assignment_form_submit($form, &$form_state){
 				'assignment_name' => $form_state['values']['aname'],
 				'assignment_id' => $code,
 				'class_code' => $form_state['values']['cc'],
-				'problem' => $form_state['values']['pname'],
+				'problem' => $form_state['values']['aname'],
 				'problem_properties' => $params
 			))->execute();
 	}

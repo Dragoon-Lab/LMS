@@ -132,7 +132,7 @@ function class_assignments_handle_assignment($code){
 
 					//attach the folder modal
 					$user_det = array('uid' => $user->uid, 'uname' => $user->name);
-					$userFoldersList  = loadUserFolders2($user->det);
+					$userFoldersList  = loadUserFolders2($user_det);
 					$options = "";
 					foreach($userFoldersList as $fid => $fname){
 						$options = $options. "<option value='".$fid."'>".$fname."</option>";
