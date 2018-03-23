@@ -23,6 +23,7 @@ function create_assignment_form($form, &$form_state){
 	);
 
 	$form['m'] = array(
+		'#id' => 'form_open_radios',
 		'#type' => 'radios',
 		'#required' => TRUE,
 	);
@@ -59,6 +60,19 @@ function create_assignment_form($form, &$form_state){
 		'#type' => 'hidden',
 	);
 
+	$form['fp'] = array(
+		'#type' => 'hidden',
+		'#value' => 'off',
+	);
+
+	$form['ln_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Lock Nodes'),
+		'#id' => 'ln_checkbox',
+		'#prefix' => '<div id="ln_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Create Assignment'),
@@ -85,10 +99,10 @@ function create_assignment_form_submit($form, &$form_state){
 	unset($params['form_token']);
 	unset($params['form_id']);
 	unset($params['op']);
+	unset($params['ln_checkbox']);
 	$params['p'] = $form_state['values']['aname'];
 	echo $form_state['values']['pname'];
 	$params = json_encode($params);
-	echo $params;
 	module_load_include('inc', 'forms', 'forms_utils');
 	$code = get_code(12);
 	if(!(strpos($form_state['values']['create_session'], "error" !== false))){

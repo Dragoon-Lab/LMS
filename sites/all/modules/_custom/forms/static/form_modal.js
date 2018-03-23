@@ -13,8 +13,9 @@ jQuery(document).ready(function($) {
 		//by default check the student mode
 		$('input[type=radio]#edit-m-studentaconstruction').prop('checked',true);
 
-		//model library problems should have restart problem enabled by default
+		//model library problems should have restart problem and lock nodes enabled by default
 		enableRestart(true);
+		enableLockNodes(true);
 
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
@@ -51,6 +52,18 @@ jQuery(document).ready(function($) {
 		//by default each time restart is enabled or disabled, uncheck the box and also set form rp value to off
 		$('#rp_checkbox').prop('checked',false);
 		form['rp'].value = "off";
+	}
+
+	var enableLockNodes = function(/* status */ status){
+		if(status){
+			$('#ln_checkbox_container').show();
+		}
+		else{
+			$('#ln_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#ln_checkbox').prop('checked',false);
+		form['fp'].value = "off";
 	}
 
 	var submitProblemsForm = function(){
@@ -169,8 +182,9 @@ jQuery(document).ready(function($) {
 		$('input[type=radio]#edit-m-authoraconstruction').closest('div').show();
 		//author mode has to be the default value in case of non class models
 		$('input[type=radio]#edit-m-authoraconstruction').prop('checked',true);
-		//since default is author mode, restart problem should be hidden and disabled
+		//since default is author mode, restart problem and lock nodes should be hidden and disabled
 		enableRestart(false);
+		enableLockNodes(false);
 		// add "g" to the form as the public library models wont have a g in the form them selves, g indicates group
 		//check if g is defined already and remove it from form before appending a new value
 		if(form["g"] != undefined){
@@ -203,19 +217,31 @@ jQuery(document).ready(function($) {
 		var mode_val = $("input[type='radio'][name='m']:checked").val();
 		var mode_val_ar = mode_val.split("&");
 		var mode = mode_val_ar[0];
-		if(mode == "AUTHOR")
+		if(mode == "AUTHOR"){
 			enableRestart(false);
-		else
+			enableLockNodes(false);
+		}
+		else{
 			enableRestart(true);
+			enableLockNodes(true);
+		}
+
 	});
 
 	$('#rp_checkbox').change(function(){
 		var checked = $("input[name='rp_checkbox']:checked").val();
-		console.log("checked", checked);
 		if(checked)
 			form["rp"].value = 'on';
 		else
 			form["rp"].value = 'off';
+	});
+
+	$('#ln_checkbox').change(function(){
+		var checked = $("input[name='ln_checkbox']:checked").val();
+		if(checked)
+			form["fp"].value = 'on';
+		else
+			form["fp"].value = 'off';
 	});
 
 });

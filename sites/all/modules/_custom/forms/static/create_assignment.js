@@ -1,26 +1,15 @@
-(function ($){
-	$(document).ready(function(){
-		$('.dragoon_problem').click(showForm);
-		$('.dragoon_nc_problem').click(showForm);
-		$('#submit_button').click(function(event){
-			event.preventDefault();
-			submitForm();
-		});
-	});
-
+jQuery(document).ready(function($) {
+	var form = document.forms['create_assignment_form'];
 	var submitForm = function(){
-		var form = document.forms['create_assignment_form'];
 		if(form.create_session.value){
 			var g = form.g && form.g.value ? form.g.value : "";
 			var result = createSession(form.p.value, form.s.value, g, form.aname.value);
 			form.create_session.value += result;
 		}
-
 		form.submit();
 	};
 
 	var showForm = function(event){
-		var form = document.forms['create_assignment_form'];
 		form.s.value = $("#section").val();
 		var id = "#" + event.target.id;
 		form.problem.value = $(id).attr('key');
@@ -34,6 +23,7 @@
 		} else {
 			form.create_session.value = false;
 		}
+		enableLockNodes(false);
 	};
 
 	var createSession = function(p, s, g, aname){
@@ -68,7 +58,6 @@
 	};
 
 	var updateGroup = function(event){
-		var form = document.forms['create_assignment_form'];
 		var id = "#" + event.target.id;
 		var user = $("#userName").val();
 
@@ -85,4 +74,45 @@
 		}
 		form.g.value = group_name;
 	};
-})(jQuery);
+
+	var enableLockNodes = function(/* status */ status){
+		if(status){
+			$('#ln_checkbox_container').show();
+		}
+		else{
+			$('#ln_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#ln_checkbox').prop('checked',false);
+		form['fp'].value = "off";
+	}
+
+	$('#ln_checkbox').change(function(){
+		var checked = $("input[name='ln_checkbox']:checked").val();
+		if(checked)
+			form["fp"].value = 'on';
+		else
+			form["fp"].value = 'off';
+	});
+
+	$('#form_open_radios').change(function(){
+		var mode_val = $("input[type='radio'][name='m']:checked").val();
+		var mode_val_ar = mode_val.split("|");
+		var mode = mode_val_ar[0];
+		console.log(mode, "is ");
+		if(mode == "AUTHOR"){
+			enableLockNodes(false);
+		}
+		else{
+			enableLockNodes(true);
+		}
+
+	});
+	$('.dragoon_problem').click(showForm);
+	$('.dragoon_nc_problem').click(showForm);
+	$('#submit_button').click(function(event){
+		event.preventDefault();
+		submitForm();
+		});
+});
+

@@ -103,6 +103,19 @@ function problem_form($form, &$form_state){
 		'#suffix' => '</div>'
 	);
 
+	$form['fp'] = array(
+		'#type' => 'hidden',
+		'#value' => 'off',
+	);
+
+	$form['ln_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Lock Nodes'),
+		'#id' => 'ln_checkbox',
+		'#prefix' => '<div id="ln_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Open Problem'),
