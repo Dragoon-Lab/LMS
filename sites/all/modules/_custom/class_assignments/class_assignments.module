@@ -103,6 +103,7 @@ function class_assignments_handle_assignment($code){
 				$sm = $props["sm"];
 				$sec = $props["s"];
 				$is = $props["is"];
+				$fp = $props["fp"];
 				$addGroup = "";
 				if(isset($props["g"]) && $props["g"] != ""){
 					$grp = $props["g"];
@@ -117,6 +118,7 @@ function class_assignments_handle_assignment($code){
 								<input type='hidden' name='m' value='$mode'>
 								<input type='hidden' name='sm' value='$sm'>
 								<input type='hidden' name='s' value='$sec'>
+								<input type='hidden' name='fp' value='$fp'>
 								<input type='hidden' name='is' value='$is'>".
 								$addGroup."
 							</form>";

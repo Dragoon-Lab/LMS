@@ -62,7 +62,7 @@ function create_assignment_form($form, &$form_state){
 
 	$form['fp'] = array(
 		'#type' => 'hidden',
-		'#value' => 'off',
+		'#default_value' => 'off',
 	);
 
 	$form['ln_checkbox'] = array(
