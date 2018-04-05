@@ -1,0 +1,173 @@
+<?php
+
+function system_descriptions_schema(){
+	$schema = array();
+	$schema['system_descriptions'] = array(
+		'description' => 'Table to store user created system descriptions',
+		'fields' => array(
+			'sd_id' => array(
+				'type' => 'serial',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'system descriptions serial number and primary key',
+			),
+
+			'sd_name' => array(
+				'type' => 'varchar',
+				'length' => 150,
+				'not null' => TRUE,
+				'description' => 'name given to the system descriptions',
+			),
+
+			'sd_model' => array(
+				'type' => 'varchar',
+				'length' => 100,
+				'not null' => TRUE,
+				'description' => 'model to which the sd refers to',
+			),
+
+			'folder_num' => array(
+				'type' => 'int',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'Folder serial number of the current folder to which sd refers to',
+			),
+
+			'sd_path' =>  array(
+				'type' => 'text',
+				'length' => 250,
+				'not null' => TRUE,
+				'description' => 'system path for the sd',
+			),
+
+			'sd_section' => array(
+				'type' => 'varchar',
+				'length' => 100,
+				'not null' => TRUE,
+				'description' => 'section to which the sd refers to',
+			),
+
+			'sd_type' => array(
+				'type' => 'varchar',
+				'length' => 30,
+				'not null' => TRUE,
+				'description' => 'type of the sd (pdf, cketext)',
+			),
+
+			'sd_source' => array(
+				'type' => 'varchar',
+				'length' => 30,
+				'not null' => TRUE,
+				'description' => 'sd can refer to both models and problems/assignments for now',
+			),
+
+			'uid' => array(
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0,
+				'unsigned' => TRUE,
+				'description' => 'uid from users table represents who created the sd',
+			),
+
+			'created_time' => array(
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+				'description' => 'time when sd was created',
+			),
+
+		),
+		'primary key' => array('sd_id'),
+		'foreign keys' => array(
+			'user_id' => array(
+				'table' => 'users',
+				'columns' => array('uid' => 'uid'),
+			),
+			'folder_num' => array(
+				'table' => 'folders',
+				'columns' => array('folder_num' => 'folder_num'),
+			),
+		),
+	);
+	$schema['assignment_sds'] = array(
+		'description' => 'Table to store system descriptions of an assignment/problem',
+		'fields' => array(
+			'asd_id' => array(
+				'type' => 'serial',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'assignment - system descriptions serial number and primary key',
+			),
+
+			'assignment_id' => array(
+				'description' => 'assignment ID of which sd is being linked',
+				'type' => 'varchar',
+				'length' => 12,
+				'not null' => TRUE,
+			),
+
+			'sd_id' => array(
+				'type' => 'int',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'system descriptions id of the current assignment',
+			),
+		),
+		'primary key' => array('asd_id'),
+		'foreign keys' => array(
+			'assignment_id' => array(
+				'table' => 'assignments',
+				'columns' => array('assignment_id' => 'assignment_id'),
+			),
+			'folder_num' => array(
+				'table' => 'system_descriptions',
+				'columns' => array('sd_id' => 'sd_id'),
+			),
+		),
+	);
+	return $schema;
+}
+
+function system_descriptions_install(){
+	db_query('
+		ALTER TABLE {system_descriptions}
+		MODIFY created_time TIMESTAMP NOT NULL
+		DEFAULT CURRENT_TIMESTAMP'
+	);
+	
+	db_query('
+		ALTER TABLE {system_descriptions}
+		ADD CONSTRAINT {system_descriptions_owner_constraint}
+		FOREIGN KEY (uid) REFERENCES {users} (uid)
+		ON DELETE CASCADE
+	');	
+
+	db_query('
+		ALTER TABLE {system_descriptions}
+		ADD CONSTRAINT {system_descriptions_folders_constraint}
+		FOREIGN KEY (folder_num) REFERENCES {folders} (folder_num)
+		ON DELETE CASCADE
+	');
+	db_query('
+		ALTER TABLE {assignment_sds}
+		ADD CONSTRAINT {assignments_id_constraint}
+		FOREIGN KEY (assignment_id) REFERENCES {assignments} (assignment_id)
+		ON DELETE CASCADE
+	');	
+
+	db_query('
+		ALTER TABLE {assignment_sds}
+		ADD CONSTRAINT {system_descriptions_id_constraint}
+		FOREIGN KEY (sd_id) REFERENCES {system_descriptions} (sd_id)
+		ON DELETE CASCADE
+	');
+}
+
+function system_descriptions_uninstall(){
+	db_query('
+		DROP TABLE system_descriptions;
+	');
+
+	db_query('
+		DROP TABLE assignment_sds;
+	');
+}
