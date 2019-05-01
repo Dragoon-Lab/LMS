@@ -18,6 +18,7 @@ robots.txt
 sites/README.txt
 sites/all/modules/README.txt
 sites/all/themes/README.txt
+sites/all/libraries/README.txt
 
 # Ignore everything but the "sites" folder ( for non core developer )
 .htaccess
@@ -36,3 +37,37 @@ xmlrpc.php
 /themes
 .*.*.swp
 *.DS_Store
+
+# Even in the sites folder, ignore the rest of modules apart from custom ones located at sites/all/modules/_custom
+sites/all/modules/*
+!sites/all/modules/_custom
+
+#Ignore custom theme folders except css files
+sites/dragoon.asu.edu/themes/*
+sites/topomath.asu.edu/themes/
+!sites/dragoon.asu.edu/themes/style.css
+!sites/topomath.asu.edu/themes/style.css
+
+#Ignore symlinks on server
+ET
+PAL3
+log
+production
+tdevel
+tproduction
+worksheets
+
+#default problem list link
+public_problem_index.json
+
+#uploads folder for topomath system descriptions
+sites/topomath.asu.edu/modules/system_descriptions/uploads/
+
+#sites.php which contains site info
+sites/sites.php
+
+#drupal root paths
+sites/all/modules/_custom/NC_models/static/drupal_root
+sites/all/modules/_custom/NC_models/static/drupal_root.sample
+sites/topomath.asu.edu/modules/system_descriptions/static/drupal_root
+

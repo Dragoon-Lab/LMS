@@ -51,6 +51,11 @@ function forms_nc_move_models($form, &$form_state){
         '#value' => $name,
         '#id' => 'current_user_name'
     );
+    $form['m'] = array(
+        '#type' => 'hidden',
+        '#id' => 'current_model_mode',
+        '#value' => in_array('teacher', $user->roles) ? "AUTHOR" : "SEDITOR"
+    );
 
     $form['copy_button'] = array(
         '#type' => 'button',

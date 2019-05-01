@@ -5,6 +5,7 @@ jQuery(document).ready(function($) {
 	//shared models by other users
 	var should_check_share = false;
 	var form = document.forms['dragoon_problem_form'];
+	var tutor = form["tutor_name"].value;
 	var showForm = function(/* object */ event){
 		var id = '#' + event.data.id;
 		should_check_share = false;
@@ -15,6 +16,11 @@ jQuery(document).ready(function($) {
 
 		//model library problems should have restart problem enabled by default
 		enableRestart(true);
+		enableLockNodes(true);
+		if(tutor == "topo"){
+			enableGiveParams(true);
+			enableGiveSchemas(true);
+		}
 
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
@@ -51,6 +57,42 @@ jQuery(document).ready(function($) {
 		//by default each time restart is enabled or disabled, uncheck the box and also set form rp value to off
 		$('#rp_checkbox').prop('checked',false);
 		form['rp'].value = "off";
+	}
+
+	var enableLockNodes = function(/* status */ status){
+		if(status){
+			$('#ln_checkbox_container').show();
+		}
+		else{
+			$('#ln_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#ln_checkbox').prop('checked',false);
+		form['fp'].value = "off";
+	}
+
+	var enableGiveParams = function(/* status */ status){
+		if(status){
+			$('#gp_checkbox_container').show();
+		}
+		else{
+			$('#gp_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#gp_checkbox').prop('checked',false);
+		form['gp'].value = "off";
+	}
+
+	var enableGiveSchemas = function(/* status */ status){
+		if(status){
+			$('#gs_checkbox_container').show();
+		}
+		else{
+			$('#gs_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#gs_checkbox').prop('checked',false);
+		form['gs'].value = "off";
 	}
 
 	var submitProblemsForm = function(){
@@ -161,6 +203,11 @@ jQuery(document).ready(function($) {
 		$('input[type=radio]#edit-m-authoraconstruction').prop('checked',true);
 		//since default is author mode, restart problem should be hidden and disabled
 		enableRestart(false);
+		enableLockNodes(false);
+		if(tutor == "topo"){
+			enableGiveParams(false);
+			enableGiveSchemas(false);
+		}
 		// add "g" to the form as the public library models wont have a g in the form them selves, g indicates group
 		//check if g is defined already and remove it from form before appending a new value
 		if(form["g"] != undefined){
@@ -193,10 +240,23 @@ jQuery(document).ready(function($) {
 		var mode_val = $("input[type='radio'][name='m']:checked").val();
 		var mode_val_ar = mode_val.split("&");
 		var mode = mode_val_ar[0];
-		if(mode == "AUTHOR")
+		if(mode == "AUTHOR" || mode == "SEDITOR"){
 			enableRestart(false);
-		else
+			enableLockNodes(false);
+			
+			if(tutor == "topo"){
+				enableGiveParams(false);
+				enableGiveSchemas(false);
+			}
+		}
+		else{
 			enableRestart(true);
+			enableLockNodes(true);
+			if(tutor == "topo"){
+				enableGiveParams(true);
+				enableGiveSchemas(true);
+			}
+		}
 	});
 
 	$('#rp_checkbox').change(function(){
@@ -205,6 +265,28 @@ jQuery(document).ready(function($) {
 			form["rp"].value = 'on';
 		else
 			form["rp"].value = 'off';
+	});
+	$('#ln_checkbox').change(function(){
+		var checked = $("input[name='ln_checkbox']:checked").val();
+		if(checked)
+			form["fp"].value = 'on';
+		else
+			form["fp"].value = 'off';
+	});
+
+	$('#gs_checkbox').change(function(){
+		var checked = $("input[name='gs_checkbox']:checked").val();
+		if(checked)
+			form["gs"].value = 'on';
+		else
+			form["gs"].value = 'off';
+	});
+	$('#gp_checkbox').change(function(){
+		var checked = $("input[name='gp_checkbox']:checked").val();
+		if(checked)
+			form["gp"].value = 'on';
+		else
+			form["gp"].value = 'off';
 	});
 
 });

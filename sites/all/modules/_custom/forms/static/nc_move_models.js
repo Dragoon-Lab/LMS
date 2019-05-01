@@ -102,6 +102,7 @@ jQuery(document).ready(function($) {
 	var modelAction = function(action){
 		var form = document.forms['dragoon_nc_move_models'];
 		var user = form["u"].value;
+                var model_mode = form["m"].value;
 		$.ajax({
 			type: "POST",
 			url: $("#dragoon_url").val()+"global.php",
@@ -112,6 +113,7 @@ jQuery(document).ready(function($) {
 				"mod": model_select.val(),
 				"dest": dest_select.val(),
 				"user": user,
+                                "mode": model_mode,
 				"section": "non-class-models"
 			},
 			success: function (data) {
