@@ -1,17 +1,16 @@
 <?php
-	function loadNCModels($user_name, $action){
+	function loadNCModels($user_det, $action){
 		//prepare content as json
 		//preparing private content
 		//private content consists of folders which are unshared and models which are private
 		//unshared folders exist in lms db, we need to pull out these folders
 		//private unshared folders
-
+		$user_name = $user_det['uname'];
+		$user_id = $user_det['uid'];
 		$query = db_select('folders','f');
 		$query->fields('f',array('folder_id','folder_name'));
-		$query->condition('owner',$user_name);
+		$query->condition('uid',$user_id);
 		$query->condition('current_status',0);
-		//$query = "select folder_id,folder_name from folders where owner='$user_name' and !current_status";
-		//return $query;
 		$result = $query->execute();
 		$string = array();
 		while($res=$result->fetchAssoc()){
@@ -24,7 +23,7 @@
 			$string["private"][$grp_name][$temp]=$temp;
 		}
 
-		//original private problems
+		//original private problems 
 		$priv_group = $user_name."-private";
 		$ret  = sendGroup($priv_group);
 		$ret = json_decode($ret);
@@ -32,19 +31,26 @@
 			$string["private"][$temp] = $temp;
 		}
 
-		//shared folders
-		$shared_q= db_select('shared_members','sh');
-		$shared_q->fields('sh',array('folder_id'));
-		$shared_q->condition('member_name',$user_name);
-		if($action)
-			$shared_q->condition('member_relation',1);
-		//$shared_q = "select folder_id from shared_members where member_name='$user_name'".$status_query;
+		//shared folders (created by someone else and shared to the current user)
+		$shared_q = db_select('shared_members','sh');
+		$shared_q->fields('sh',array('folder_num'));
+		$shared_q->condition('uid',$user_id);
 		$sh_q_res = $shared_q->execute();
 		$local_shared_store = "";
 		while($res_sh = $sh_q_res->fetchAssoc()){
-			$sh_grp = explode("-",$res_sh['folder_id']);
+
+			//we retreive folder id from the folders table using folder_num
+			$fol_num = $res_sh['folder_num'];
+			$get_fol_id = db_select('folders','f');
+			$get_fol_id->fields('f',array('folder_id'));
+			$get_fol_id->condition('folder_num',$fol_num);
+			$get_fol_id_res = $get_fol_id->execute();
+			$fol_id = $get_fol_id_res->fetchAssoc();
+			$folder_id = $fol_id['folder_id'];
+			
+			$sh_grp = explode("-",$folder_id);
 			$sh_grp_name = $sh_grp[0];
-			$ret = sendGroup($res_sh['folder_id']);
+			$ret = sendGroup($folder_id);
 			$ret = json_decode($ret);
 			foreach($ret as $temp){
 				$string["shared"][$sh_grp_name . " by " . $sh_grp[1]][$temp] = $temp;
@@ -52,14 +58,11 @@
 			}
 		}
 
-
 		//owned folders(which are shared)
 		$query2 = db_select('folders','f');
 		$query2->fields('f',array('folder_id','folder_name'));
-		$query2->condition('owner',$user_name);
+		$query2->condition('uid',$user_id);
 		$query2->condition('current_status',1);
-		//$query = "select folder_id,folder_name from folders where owner='$user_name' and !current_status";
-		//return $query;
 		$result2 = $query2->execute();
 		while($res2=$result2->fetchAssoc()){
 			$group2 = $res2['folder_id'];
@@ -80,8 +83,19 @@
 	function sendGroup($g){
 		$url = get_path();
 		$url = $url['url'].'/global.php';
-		$data = array('t' => 'reqNonClassProblems', 'g' => $g);
+		//since this function returns models and LMS has provided users choice in ordering the models
+		global $user;
+		$user_id = $user->uid;
+		$mul_cond = db_and()->condition('up_name','list_model_order')->condition('uid',$user_id);
+		$sort_q = db_select('lms_user_preferences','up')
+					->fields('up', array('up_value'))
+					->condition($mul_cond)->execute();
+		$sort_res = $sort_q->fetchAssoc();
+		$sort = '0';
+		if($sort_res['up_value'] == "alphabetic")
+			$sort = '1';
 
+		$data = array('t' => 'reqNonClassProblems', 'g' => $g, 's' => $sort);
 		$options = array(
 			'http' => array(
 				'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
@@ -170,89 +184,111 @@
 										</div>
 									</div>
 								</div>
-							</div>							
+							</div>	
+							<div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="loader"></div>
+        <div clas="loader-txt">
+          <p>Please wait while we rename your folder <br><br><small>Thanks for your patience</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>						
 							';
 		return $common_blocks;
 	}
 
-function loadUserFolders($user_name)
-{
-	//prepare all user folders which the user owns
-	// return an array
-
-	$query=db_select('folders','f');
-	$query->fields('f',array('folder_id','folder_name'));
-	$query->condition('owner',$user_name);
-	$q_res = $query->execute();
-	//create an array with default first element as user private folder with id
-	$user_folders = array();
-	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
-	while ($res = $q_res->fetchAssoc()) {
-		$group = $res['folder_id'];
-		$grp_name = $res['folder_name'];
-		$user_folders[$group] = $grp_name;
-	}
-	return $user_folders;
-}
-
-
-function loadUserFolders2($user_name)
-{
-	//prepare all user folders which the user owns
-	// return an array
-
-	$query=db_select('folders','f');
-	$query->fields('f',array('folder_id','folder_name'));
-	$query->condition('owner',$user_name);
-	$q_res = $query->execute();
-	//create an array with default first element as user private folder with id
-	$user_folders = array();
-	$user_folders[$user_name . "-private"] = 'My "Private" Folder';
-	while ($res = $q_res->fetchAssoc()) {
-		$group = $res['folder_id'];
-		$grp_name = $res['folder_name'];
-		$user_folders[$group] = $grp_name;
-	}
-	$query2 = db_select('shared_members','sh');
-	$query2->fields('sh',array('folder_id'));
-	$query2->condition('member_name',$user_name);
-	$query2->condition('member_relation',0);
-	$q_res2 = $query2->execute();
-	while($res2 = $q_res2->fetchAssoc()){
-		$group2 = $res2['folder_id'];
-		if(!isset($user_folders[$group2])){
-			$folder_name = explode("-",$group2);
-			$folder_name = $folder_name[0];
-			$user_folders[$group2] = $folder_name;
+	function loadUserFolders($user_det)
+	{
+		//prepare all user folders which the user owns
+		// return an array
+		$user_id = $user_det['uid'];
+		$user_name = $user_det['uname'];
+		$query=db_select('folders','f');
+		$query->fields('f',array('folder_id','folder_name'));
+		$query->condition('uid',$user_id);
+		$q_res = $query->execute();
+		//create an array with default first element as user private folder with id
+		$user_folders = array();
+		$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+		while ($res = $q_res->fetchAssoc()) {
+			$group = $res['folder_id'];
+			$grp_name = $res['folder_name'];
+			$user_folders[$group] = $grp_name;
 		}
+		return $user_folders;
 	}
-	return $user_folders;
-}
 
+	function loadUserFolders2($user_det)
+	{
+		//prepare all user folders which the user owns
+		// return an array
+		$user_id = $user_det['uid'];
+		$user_name = $user_det['uname'];
+		$query=db_select('folders','f');
+		$query->fields('f',array('folder_id','folder_name'));
+		$query->condition('uid',$user_id);
+		$q_res = $query->execute();
+		//create an array with default first element as user private folder with id
+		$user_folders = array();
+		$user_folders[$user_name . "-private"] = 'My "Private" Folder';
+		while ($res = $q_res->fetchAssoc()) {
+			$group = $res['folder_id'];
+			$grp_name = $res['folder_name'];
+			$user_folders[$group] = $grp_name;
+		}
+		$query2 = db_select('shared_members','sh');
+		$query2->fields('sh',array('folder_num'));
+		$query2->condition('uid',$user_id);
+		$q_res2 = $query2->execute();
+		while($res2 = $q_res2->fetchAssoc()){
+			$fol_num = $res2['folder_num'];
+			$get_fol_id = db_select('folders','f');
+			$get_fol_id->fields('f',array('folder_id'));
+			$get_fol_id->condition('folder_num',$fol_num);
+			$get_fol_id_res = $get_fol_id->execute();
+			$fol_id = $get_fol_id_res->fetchAssoc();
+			$folder_id = $fol_id['folder_id'];
+			$group2 = $folder_id;
+			if(!isset($user_folders[$group2])){
+				$folder_ar = explode("-",$group2);
+				$folder_name = $folder_ar[0];
+				$user_folders[$group2] = $folder_name. " by " . $folder_ar[1];
+			}
+		}
+		return $user_folders;
+	}
 
-function loadShareHolders($folder_name,$owner){
-	$query = db_select('shared_members','sh')
-		->fields('sh',array('member_name'))
-		->condition('folder_id',$folder_name."-".$owner)
-		->condition('member_relation',0)
-		->execute();
-	$shared_holders = '';
-	while($res = $query->fetchAssoc()){
-		$user = db_select('users','u')
-			->fields('u',array('mail'))
-			->condition('name',$res['member_name'])
+	function loadShareHolders($folder_name,$owner){
+
+		//returns current folder shared users
+		$folder_id = $folder_name."-".$owner;
+		$fol_num_q = db_select('folders','f');
+		$fol_num_q->fields('f', array('folder_num'));
+		$fol_num_q->condition('folder_id',$folder_id);
+		$fol_num_res = $fol_num_q->execute();
+		$fol_num_ar = $fol_num_res->fetchAssoc();
+		$folder_num = $fol_num_ar['folder_num'];
+		$query = db_select('shared_members','sh')
+			->fields('sh',array('uid'))
+			->condition('folder_num',$folder_num)
 			->execute();
-		$username = $user->fetchAssoc();
-		$element = "
+		$shared_holders = '';
+		while($res = $query->fetchAssoc()){
+			$user = db_select('users','u')
+				->fields('u',array('mail','name'))
+				->condition('uid',$res['uid'])
+				->execute();
+			$username = $user->fetchAssoc();
+			$element = "
 					<tr class='eachSharedHolder'>
-					<td><div class='sharedUserContent'><span>".$res['member_name']."</span><br><span class='sharedHolderEmail'>".$username['mail']."</span></div></td>
+					<td><div class='sharedUserContent'><span>".$username['name']."</span><br><span class='sharedHolderEmail'>".$username['mail']."</span></div></td>
 					<td><i class='glyphicon glyphicon-remove glyphShare' title='Unshare User' data-toggle='modal'></td>
 					</tr>";
-		$shared_holders = $shared_holders.$element;
+			$shared_holders = $shared_holders.$element;
+		}
+		return $shared_holders;
 	}
-	return $shared_holders;
-}
-
-
-
-
