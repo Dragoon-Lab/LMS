@@ -7,15 +7,16 @@ function forms_nc_rename_items($form, &$form_state){
 		$name = $user->name;
 		$rp = 'off';
 	}
-
+	$user_det = array('uid' => $user->uid, 'uname' => $user->name);
 	//call a function which returns all potential folders user model can be created in
-	$user_folders = loadUserFolders($name);
-	$user_folders2 = json_encode(loadUserFolders2($name));
+	$user_folders = loadUserFolders($user_det);
+	$user_folders2 = json_encode(loadUserFolders2($user_det));
 
 	$form['choose_item_rename'] = array(
 		'#type' => 'radios',
 		'#title' => 'Choose a folder or model to edit',
 		'#id' => 'item_selected',
+		'#prefix' => '<div id="ren_feed"></div>',
 		'#options' => array(
 			"Folder" => t('Folder'),
 			"Model" => t('Model')
@@ -27,10 +28,8 @@ function forms_nc_rename_items($form, &$form_state){
 		'#type' => 'select',
 		'#options' => $user_folders,
 		'#id' => 'original_folder_name',
-		'#prefix' => '<div id="ren_folder_label"><b>Choose Folder</b></div>',
-		'#attributes' => array(
-			'class' => array('element-hide')
-		)
+		'#prefix' => '<div id="ren_folder_div" class="element-hide"><b>Choose Folder</b>',
+		'#suffix' => '</div>'
 	);
 	//data item which contains user owned folders
 	$form['user_owned_folders'] = array(
@@ -53,20 +52,15 @@ function forms_nc_rename_items($form, &$form_state){
 		'#type' => 'select',
 		'#options' => array('Loading Models...'),
 		'#id' => 'original_model_name',
-		'#prefix' => '<div id="ren_model_label"><b>Choose Model</b></div>',
-		'#attributes' => array(
-			'class' => array('element-hide')
-		)
+		'#prefix' => '<div id="ren_model_div" class="element-hide mt-10"><b>Choose Model</b>',
+		'#suffix' => '</div>'
 	);
 	$form['select_new_name'] = array(
 		//pump folder options including the user personal folder
 		'#type' =>  'textfield',
-		'#options' => $user_folders,
 		'#id' => 'new_item_name',
-		'#prefix' => '<div id="new_name_label"><b>Choose New Name</b></div>',
-		'#attributes' => array(
-			'class' => array('element-hide')
-		),
+		'#prefix' => '<div id="new_name_div" class="element-hide mt-10"><b>Choose New Name</b>',
+		'#suffix' => '</div>',
 		'#maxlength' => 35
 	);
 
@@ -80,14 +74,23 @@ function forms_nc_rename_items($form, &$form_state){
 		'#type' => 'button',
 		'#value' => t('Rename item'),
 		'#id' => 'rename_item_button',
+		'#prefix' => '<div id="rename_buttons_div" class="mt-10">',
 		'#attributes' => array(
 			'class' => array('btn btn-success element-hide')
-		)
+		),
+		'#ajax' => array(
+			'callback' => 'ajax_rename_item_callback',
+			'wrapper' => 'ren_feed',
+			'method' => 'html',
+			'effect' => 'fade',
+			'event' => 'renameItemEvent'
+		),
 	);
 
 	$form['cancel_button'] = array(
 		'#type' => 'button',
 		'#value' => t('Cancel'),
+		'#suffix' => '</div>'
 	);
 	return $form;
 }

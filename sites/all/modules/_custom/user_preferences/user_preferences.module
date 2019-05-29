@@ -1,0 +1,27 @@
+<?php
+function user_preferences_block_info(){
+	$blocks = array();
+	$blocks['input_user_preferences'] = array(
+		'info' => 'user modifies his preferences here'
+	);
+	return $blocks;
+}
+
+function user_preferences_block_view($delta = ''){
+	$block = array();
+	switch($delta){
+		case 'input_user_preferences':
+			module_load_include('inc', 'user_preferences', 'user_preferences_handler_form');
+			$form = drupal_get_form('user_preferences_handler_form');
+			$block['content'] = array(
+				'#markup' => drupal_render($form),
+			);
+			break;
+	}
+
+	return $block;
+
+}
+
+
+

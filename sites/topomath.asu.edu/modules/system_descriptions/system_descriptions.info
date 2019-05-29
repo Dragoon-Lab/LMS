@@ -4,4 +4,5 @@ core = 7.x
 package = Model Blocks
 version = "7.x-0.1"
 core = "7.x"
+dependencies[] = NC_models
 dependencies[] = url_dragoon

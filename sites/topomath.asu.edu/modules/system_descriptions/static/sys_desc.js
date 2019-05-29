@@ -13,7 +13,12 @@ jQuery(document).ready(function($){
 		//show descriptions for the problem as a list
 		//each description should be viewable and have edit/delete options as well.
 		console.log("loading system descriptions");
-		update_desc_list();
+		var form = document.forms['dragoon_problem_form'];
+		var prob_name = form["p"].value;
+		$("#handleSystemDesc").find('.modal-title').text("System Descriptions for "+prob_name);
+
+		
+		$(this).trigger("refresh_sd_list");
 	});
 
 	//file upload ajax handler
@@ -94,7 +99,7 @@ jQuery(document).ready(function($){
 
 	$('#add-desc-text').on('click',function(){
 		var form = document.forms['dragoon_problem_form'];
-		var user = form["u"].value;
+		var user = form["uid"].value;
 		var prob_name = form["p"].value;
 		var folder = form["f"].value;
 		var sec = form["s"].value;
@@ -150,8 +155,9 @@ jQuery(document).ready(function($){
 
 	var add_new_description = function(file_name,path_name){
 		//step 1: collect data relevant to the operations of this module
+		console.log("adding new description");
 		var form = document.forms['dragoon_problem_form'];
-		var user = form["u"].value;
+		var user = form["uid"].value;
 		var folder = form["f"].value;
 		var problem = form["p"].value;
 		var section = form["s"].value;
@@ -167,11 +173,15 @@ jQuery(document).ready(function($){
 			req_type: "new_desc",
 			desc_type: "upload"
 		}
+		console.log("input data", input);
 		$.post(sd_update_handler, input)
 			.success(function (datum) {
 				console.log("received",datum);
 				//location.reload();
-		});		
+			})
+			.fail(function(datum){
+				console.log("received", datum);
+			});	
 	};
 
 	/*

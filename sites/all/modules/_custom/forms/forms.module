@@ -246,11 +246,6 @@ function forms_form_alter(&$form, &$form_state, $form_id){
 				//'onsubmit' => 'return false;',
 				'id' => 'dragoon_ncDelFolder_form'
 			);
-			$form['submit_button']['#attributes'] = array(
-				'data-dismiss' => 'modal',
-				'data-toggle'=>"modal",
-				'href'=> '#confirmDeleteModal',
-			);
 			$form['cancel_button']['#attributes'] = array(
 				'data-dismiss' => 'modal',
 			);

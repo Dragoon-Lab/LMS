@@ -6,6 +6,7 @@ jQuery(document).ready(function($) {
 	var should_check_share = false;
 	var form = document.forms['dragoon_problem_form'];
 	var tutor = form["tutor_name"].value;
+	console.log("tutor", tutor);
 	var showForm = function(/* object */ event){
 		var id = '#' + event.data.id;
 		should_check_share = false;
@@ -14,14 +15,13 @@ jQuery(document).ready(function($) {
 		//by default check the student mode
 		$('input[type=radio]#edit-m-studentaconstruction').prop('checked',true);
 
-		//model library problems should have restart problem enabled by default
+		//model library problems should have restart problem and lock nodes enabled by default
 		enableRestart(true);
 		enableLockNodes(true);
 		if(tutor == "topo"){
 			enableGiveParams(true);
 			enableGiveSchemas(true);
 		}
-
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
 		if(form["g"] != undefined)
@@ -201,7 +201,7 @@ jQuery(document).ready(function($) {
 		$('input[type=radio]#edit-m-authoraconstruction').closest('div').show();
 		//author mode has to be the default value in case of non class models
 		$('input[type=radio]#edit-m-authoraconstruction').prop('checked',true);
-		//since default is author mode, restart problem should be hidden and disabled
+		//since default is author mode, restart problem and lock nodes should be hidden and disabled
 		enableRestart(false);
 		enableLockNodes(false);
 		if(tutor == "topo"){
@@ -266,6 +266,7 @@ jQuery(document).ready(function($) {
 		else
 			form["rp"].value = 'off';
 	});
+
 	$('#ln_checkbox').change(function(){
 		var checked = $("input[name='ln_checkbox']:checked").val();
 		if(checked)

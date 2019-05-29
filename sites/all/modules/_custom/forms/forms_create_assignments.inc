@@ -33,6 +33,15 @@ function create_assignment_form($form, &$form_state){
 		$form['m'][$option] = $value;
 	}
 
+	if(has_system_descriptions()){
+		$form['sd'] = array(
+			'#id' => 'assignment_def_sd',
+			'#type' => 'select',
+			'#validated' => TRUE,
+			'#title' => t('Choose System description'),
+		);
+	}
+
 	$form['p'] = array(
 		'#type' => 'hidden',
 	);
@@ -59,10 +68,12 @@ function create_assignment_form($form, &$form_state){
 	$form['g'] = array(
 		'#type' => 'hidden',
 	);
+
 	$form['fp'] = array(
 		'#type' => 'hidden',
 		'#default_value' => 'off',
 	);
+
 	$form['ln_checkbox'] = array(
 		'#type' => 'checkbox',
 		'#title' => t('Lock Nodes'),
@@ -122,20 +133,28 @@ function create_assignment_form_submit($form, &$form_state){
 	unset($params['form_token']);
 	unset($params['form_id']);
 	unset($params['op']);
-
+	unset($params['ln_checkbox']);
+	$params['p'] = $form_state['values']['aname'];
 	echo $form_state['values']['pname'];
 	$params = json_encode($params);
-	echo $params;
 	module_load_include('inc', 'forms', 'forms_utils');
 	$code = get_code(12);
 	if(!(strpos($form_state['values']['create_session'], "error" !== false))){
-		db_insert('assignments')
+		$last_id = db_insert('assignments')
 			->fields(array(
 				'assignment_name' => $form_state['values']['aname'],
 				'assignment_id' => $code,
 				'class_code' => $form_state['values']['cc'],
-				'problem' => $form_state['values']['pname'],
+				'problem' => $form_state['values']['aname'],
 				'problem_properties' => $params
 			))->execute();
+
+		if(isset($form_state['values']['sd']) && $form_state['values']['sd'] != 0){
+			db_insert('assignment_sds')
+			->fields(array(
+				'assignment_id' => $code,
+				'sd_id' => $form_state['values']['sd']
+			))->execute();
+		}
 	}
 }

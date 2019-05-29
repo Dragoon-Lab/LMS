@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
 			enableGiveParams(false);
 			enableGiveSchemas(false);
 		}
-		//updateSystemDescriptions();
+		updateSystemDescriptions();
 	};
 
 	var createSession = function(p, s, g, aname){

@@ -1,0 +1,368 @@
+<?php
+
+function check_folder_duplicate($folder_id){
+
+	$ret_dat = array('is_duplicate' => NULL, 'exception' => NULL);
+		
+	try {
+		$row_count = db_select('folders')->condition('folder_id', $folder_id)->countQuery()->execute()->fetchField();
+		if($row_count>0){
+			$ret_dat['is_duplicate'] = true;
+		}
+		return $ret_dat;
+	}
+
+	catch(Exception $e) {
+		//Something went wrong with select query
+		$ret_dat['exception'] = true;
+		watchdog_exception('folder_dup_check', $e);
+		return $ret_dat;
+	}
+}
+
+function ajax_create_folder_callback($form, &$form_state){
+	$folder = $form_state['values']['folder_name'];
+	
+	//check for duplicate folder name
+	//folder_id is used to check for duplicacy and is a combination of folder name and owner
+	$owner = $form_state['values']['owner'];
+	$uid = $form_state['values']['owner_id'];
+	$folder_id = $folder."-".$owner;
+	$ret = check_folder_duplicate($folder_id);
+	if($ret['is_duplicate'] && !$ret['exception']){
+		$error = t('A folder with given name already exists');
+		return $error;
+	}
+	else if($ret['exception']){
+		$error = t('Failed!, please try again');
+		return $error;
+	}
+
+	// All precases have been passed, create folder next
+	// Type 0 indicates a non class folder
+	$type = 0;
+	$folder_class_id = $form_state['values']['class-id'];
+	//current status indicates if the folder is shared or not, for private
+	$current_status = $form_state['values']['sharing_status'];
+	try {
+		//db_insert function should be specified a return option for the count of rows inserted 
+		//will be returned (if not we use this option execute() returns auto inc field or undefined if the auto inc is not present)
+		$insert_count = db_insert('folders',array('return' => Database::RETURN_AFFECTED))
+				->fields(array(
+					'folder_id' => ''.$folder_id,
+					'folder_name' => ''.$folder,
+					'uid' => ''.$uid,
+					'folder_type' => ''.$type,
+					'class_code' => ''.$folder_class_id,
+					'current_status' => ''.$current_status,
+					'created_time' => NULL,
+				))->execute();
+		
+		if($insert_count != 1){
+			//either throw exception or set error because insert has not shown desired affect
+			$error = t('Failed!, please try again');
+			return $error;
+		}
+		$commands[] = ajax_command_html('#block-forms-create-non-class-folder', "Folder creation succesful, page will reload in few seconds");
+		$commands[] = array('command' => 'reloadPage');
+		return array('#type' => 'ajax', '#commands' => $commands);
+	}
+	catch (Exception $e) {
+		// Query failed;
+		$error = t('Failed!, please try again'. $e->getMessage());
+		return $error;
+	}
+}
+
+function ajax_copy_model_callback($form, $form_state){
+	$result = send_mvcp_request($form, $form_state, "copyModel");
+	$ret_msg = "";
+	if(trim($result) != "success"){
+		return $result;
+		$ret_msg = $result;
+	}
+	$go_reload = true;	
+	$ret_msg = "Model copied successfully";
+	$commands[] = ajax_command_html('#block-forms-move-models', $ret_msg);
+	if($go_reload)
+		$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function ajax_move_model_callback($form, $form_state){
+	$result = send_mvcp_request($form, $form_state, "moveModel");
+	$ret_msg = "";
+	if(trim($result) != "success"){
+		$ret_msg = $result;
+	}
+	$go_reload = true;
+	$ret_msg = "Model moved successfully";
+	$commands[] = ajax_command_html('#block-forms-move-models', $ret_msg);
+	if($go_reload)
+		$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function send_mvcp_request($form, $form_state, $action){
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
+	$src = isset($form_state['values']['source_folder']) ? $form_state['values']['source_folder'] : null;
+	$mod = isset($form_state['values']['source_model']) ? $form_state['values']['source_model'] : null;
+	$dest = isset($form_state['values']['destination_folder']) ? $form_state['values']['destination_folder'] : null;
+
+	if(empty($src) || empty($mod) || empty($dest)){
+		return "Please make sure valid data is being moved or copied";
+	}
+
+	$user = isset($form_state['values']['u'])? $form_state['values']['u'] : null;
+	if(empty($user)){
+		return "Please login again and try";
+	}
+	$data = array(
+			't'=> 'modelAction', 
+			'action' => $action,
+			'src' => $src,
+			'mod' => $mod,
+			'dest' => $dest,
+			'user' => $user,
+			'section' => 'non-class-models'
+		);
+		//New model name case only originates when model is being copied
+	if($action == "copyModel"){
+		$new_mod = isset($form_state['values']['model_newname']) ? $form_state['values']['model_newname']: null;
+		if(is_null($new_mod))
+			return "Please make sure new model name is valid";
+		else
+			$data['new_mod'] = $new_mod;
+	}
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+
+}
+
+
+function ajax_del_items($form, $form_state){
+
+	$fol_ar = !empty($form_state['values']['selected_folders'])? explode(",", $form_state['values']['selected_folders']): NULL;
+	$mod_ar = !empty($form_state['values']['selected_models'])? json_decode($form_state['values']['selected_models'], TRUE): NULL;
+
+	//folder and models data are both in string format
+	
+	$owner = !empty($form_state['values']['owner'])? $form_state['values']['owner']: "";
+	$undel_folders = array();
+	$undel_models = array();
+	if($fol_ar){
+		//folder deletion
+		foreach($fol_ar as $folder_id){
+			$transaction = db_transaction();
+		
+			//delete from folders table
+			try{
+				$del_count = db_delete('folders')
+						->condition('folder_id',$folder_id)
+						->execute();
+				// Exactly one folder has to be deleted
+				// and if delete cascade is enforced on the db tables, we need not delete from shared_members table
+				if($del_count == 1){
+					// go for second function which deletes models on tutor side
+					$ret = trim(delete_folder_models($folder_id));
+					if($ret !== "success"){
+						throw new Exception('Tutor side deletion failed: '. $folder_id);
+					}
+
+				}
+				else{
+					//throw exception
+					//models and folder deletion from tutor
+					throw new Exception('Delete query failed'. $folder_id);
+				}
+			}
+			catch (Exception $e){
+				$transaction->rollback();
+				watchdog_exception('lms delete failed', $e);
+				array_push($undel_folders, $folder_id);
+			}
+		}
+
+	}
+
+	if($mod_ar){
+		// In this case we send a bunch of
+		$del_res = trim(delete_specific_models($mod_ar));
+		if($del_res == 'fail'){
+			$mod_msg = t('None of the selected models could be deleted');
+		}
+		else if($del_res == 'success'){
+			$mod_msg = t('All chosen models have been deleted successfully');
+		}
+		else{
+			$undel_models = json_decode($del_res, TRUE);
+			return print_r($undel_models);
+		}
+	}
+	
+	//create return html
+	$ret_msg = ""; $go_reload = false;
+	if(sizeof($undel_folders) == 0 && sizeof($undel_models) == 0){
+		$ret_msg = '<b>Deletion succesful</b>';
+		$go_reload = true;
+	}
+	
+	if(sizeof($undel_folders) > 0){
+		$ret_msg = $ret_msg.'<b> The following folders could not be deleted </b>';
+		foreach($undel_folders as $fo){
+			$fo_ar = explode("-", $fo);
+			$ret_msg = $ret_msg.'<br/><i>'.$fo_ar[0].'</i>';
+		}
+	}
+
+	if(sizeof($undel_models) > 0){
+		$ret_msg = $ret_msg. '<b> The following model could not be deleted </b>';
+		foreach($undel_models as $mo => $fol){
+			$fol_ar = explode("-", $fol);
+			if($fol_ar[1] == "private")
+				$fname = "your private folder";
+			else
+				$fname = $fol[0];
+			$ret_msg = $ret_msg.'<br/><i>'.$mo.'</i> in '.$fname.'';
+		}
+	}
+
+	$commands[] = ajax_command_html('#block-forms-delete-non-class-folder', $ret_msg);
+	if($go_reload)
+		$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);	
+}
+
+function delete_folder_models($folder_id){
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
+	$data = array('t'=> 'deleteFolderModels', 'fid' => $folder_id);
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}
+
+function delete_specific_models($del_models){
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
+	$data = array('t' => 'deleteSpecificModels', 'dm' => $del_models);
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}
+
+
+// Rename module related calls
+function ajax_rename_item_callback($form, $form_state){
+	$action = isset($form_state['values']['choose_item_rename'])? $form_state['values']['choose_item_rename']: "";
+	$old_folder_id = isset($form_state['values']['select_folder_item'])? $form_state['values']['select_folder_item']: "";
+	$new_name = isset($form_state['values']['select_new_name']) ? $form_state['values']['select_new_name'] : "";
+	$user = isset($form_state['values']['u_ren'])? $form_state['values']['u_ren']: "";
+
+	if(empty($action) || empty($old_folder_id) || empty($new_name) || empty($user)){
+		return "Please make sure all the values given are valid and not empty";
+	}
+	$new_name_mod = $new_name."-".$user;
+	$data = array(
+		't' => 'renameItems',
+		'old_folder' => $old_folder_id,
+		'action' => $action,
+		'new_name' => $new_name_mod,
+	);
+	//check if user wants to rename a model
+	if($action == "Model"){
+		$model = isset($form_state['values']['select_model_item'])? $form_state['values']['select_model_item']: "";
+		if(empty($model))
+			return "Please enter a new valid model name";
+		$data['old_model'] = $model;
+		$data['new_name'] = $new_name;
+	}
+	// Two cases here
+	// case 1: user renames a folder, local db has to be updated before tutor sessions are updated with new name
+	// both updates have to be a logical unit, we use transactions for this purpose
+
+	// case 2: simply update a tutor db
+	$ret_msg = "";
+	$fol_err_msg = "<b>Folder rename failed</b><br/><i>Please make sure folder names are not redundant or duplicate values</i>";
+	$mod_err_msg = "<b>Model rename failed</b><br/><i>Please make sure folder names are not redundant or duplicate values</i>";
+	if($action == "Folder"){
+		//open a transaction
+		$trans = db_transaction();
+
+		try{
+			$update_count = db_update('folders')
+					->fields(array(
+						'folder_id' => $new_name_mod,
+						'folder_name' => $new_name,
+					))
+					->condition('folder_id',$old_folder_id)
+					->execute();
+			if($update_count != 1)
+				throw new Exception($fol_err_msg);
+			// now call for rename tutor
+			$res = rename_tutor_model($data);
+			if(trim($res) == "success"){
+				$ret_msg = "Folder renamed successfully";
+			}
+			else{
+				throw new Exception($fol_err_msg);
+			}
+		}
+		catch (Exception $e){
+			$trans->rollback();
+			watchdog_exception('rename failed : ', $e);
+			$ret_msg = $e->getMessage();
+		}
+	}
+	else{
+		$res = rename_tutor_model($data);
+		if(trim($res) == "success"){
+				$ret_msg = "Model renamed successfully";
+		}else{
+			$ret_msg = $mod_err_msg;
+		}
+	} 
+	//build rename data for tutor
+	$commands[] = ajax_command_html('#block-forms-rename-items', $ret_msg);
+	$commands[] = array('command' => 'reloadPage');
+	return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function rename_tutor_model($data){
+
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}

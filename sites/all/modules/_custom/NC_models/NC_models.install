@@ -6,61 +6,76 @@ function NC_models_schema(){
 	$schema['folders'] = array(
 		'description' => 'Table to store details of folders created by users',
 		'fields' => array(
-			'folder_id' => array(
-				'description' => 'Unique folder id which is a combination of folder name and userid of the folder owner or his private folder',
-				'type' => 'varchar',
-				'length' => 150,
+			'folder_num' => array(
+				'type' => 'serial',
+				'size' => 'medium',
 				'not null' => TRUE,
+				'description' => 'Folder serial number and primary key',
+			),
+			'folder_id' => array(
+				'type' => 'varchar',
+				'length' => 161,
+				'not null' => TRUE,
+				'description' => 'Unique folder identifier which is a combination of folder name and userid of the folder owner or his private folder',
 			),
 			'folder_name' => array(
+				'type' => 'varchar',
+				'length' => 100,
+				'not null' => TRUE,
 				'description' => 'Folder name given by the user',
-				'type' => 'varchar',
-				'length' => 150,
-				'not null' => TRUE,
 			),
-			'owner' => array(
-				'description' => 'User who has created the folder',
-				'type' => 'varchar',
-				'length' => 32,
+			'uid' => array(
+				'type' => 'int',
 				'not null' => TRUE,
+				'default' => 0,
+				'unsigned' => TRUE,
+				'description' => 'uid from users table represents owner of the folder',
 			),
 			'folder_type' => array(
+				'type' => 'int',
+				'size' => 'tiny',
+				'not null' => TRUE,
+				'default' => 0,
 				'description' => 'indicates if the folder is class/non class folder',
-				'type' => 'tinyint',
-				'mysql_type' => 'TINYINT',
-				'length' => 4,
-				'not null' => TRUE,
 			),
-			'folder_class_id' => array(
-				'description' => 'class id corresponding to the folder if it is class folder',
+			'class_code' => array(
 				'type' => 'varchar',
-				'length' => 20,
+				'length' => 6,
 				'not null' => TRUE,
-			),
-			'created_time' => array(
-				'description' => 'time stamp when the assignment was given',
-				'type' => 'timestamp',
-				'mysql_type' => 'TIMESTAMP',
-				'not null' => TRUE,
+				'default' => '000000',
+				'description' => 'class code corresponding to the class folder, default for a non class folder, primary key classes table',
 			),
 			'current_status' => array(
-				'description' => 'Indicates current status of the folder (shared, unshared, ..)',
-				'type' => 'tinyint',
-				'mysql_type' => 'TINYINT',
-				'length' => 1,
+				'type' => 'int',
+				'size' => 'tiny',
 				'not null' => TRUE,
+				'default' => 0,
+				'description' => 'Indicates current status of the folder (shared, unshared, ..)',
+			),
+			'created_time' => array(
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+				'description' => 'time when folder was created',
+			),
+			'last_updated' => array(
+				'mysql_type' => 'DATETIME',
+				'not null' => TRUE,
+				'description' => 'time when folder was last updated',
 			),
 		),
-		'primary key' => array('folder_id'),
+		'primary key' => array('folder_num'),
 		'foreign keys' => array(
-			'user_constraint' => array(
+			'user_id' => array(
 				'table' => 'users',
-				'columns' => array('owner' => 'name'),
+				'columns' => array('uid' => 'uid'),
+			),
+			'class_code' => array(
+				'table' => 'classes',
+				'columns' => array('class_code' => 'code'), 
 			),
 		),
 		'unique keys' => array(
-			'folder_owner' => array('folder_id', 'owner'),
-			'folder_id-name' => array('folder_id', 'folder_name')
+			'folder_id' => array('folder_id'),
 		),
 	);
 
@@ -69,43 +84,45 @@ function NC_models_schema(){
 		'fields' => array(
 			'shared_id' => array(
 				'type' => 'serial',
-				'length' => 10,
-			),
-			'member_name' => array(
-				'description' => 'username of the shared user', 
-				'type' => 'varchar',
-				'length' => 32,
+				'size' => 'medium',
 				'not null' => TRUE,
+				'description' => 'shared members serial id and primary key',
 			),
-			'folder_id' => array(
-				'description' => 'Currently shared folder_id',
-				'type' => 'varchar',
-				'length' => 150,
+			'uid' => array(
+				'type' => 'int',
 				'not null' => TRUE,
+				'default' => 0,
+				'unsigned' => TRUE,
+				'description' => 'uid from users table(whom the folder is shared with)',
+			),
+			'folder_num' => array(
+				'type' => 'int',
+				'size' => 'medium',
+				'not null' => TRUE,
+				'description' => 'Folder serial number of the current folder being shared',
 			),
 			'member_relation' => array(
+				'type' => 'int',
+				'size' => 'tiny',
+				'not null' => TRUE,
+				'default' => 0,
 				'description' => 'type of relationship user has with the folder indicated by a number',
-				'type' => 'tinyint',
-				'mysql_type' => 'TINYINT',
-				'length' => 4,
-				'not null' => TRUE
 			),
 			'sh_shared_time' => array(
-				'description' => 'time stamp when the class was created',
-				'type' => 'timestamp',
-				'mysql_type' => 'TIMESTAMP',
+				'mysql_type' => 'DATETIME',
 				'not null' => TRUE,
+				'description' => 'time when the folder was shared',
 			),
 		),
 		'primary key' => array('shared_id'),
 		'foreign keys' => array(
-			'folder_constraint' => array(
+			'folder_num' => array(
 				'table' => 'folders',
-				'columns' => array('folder_id' => 'folder_id'),
+				'columns' => array('folder_num' => 'folder_num'),
 			),
-			'user_constraint' => array(
+			'user_id' => array(
 				'table' => 'users',
-				'columns' => array('member_name' => 'name'),
+				'columns' => array('uid' => 'uid'),
 			),
 		),
 	);
@@ -115,25 +132,49 @@ function NC_models_schema(){
 function NC_models_install(){
 	db_query('
 		ALTER TABLE {folders}
-		MODIFY created_time TIMESTAMP NOT NULL
+		MODIFY last_updated TIMESTAMP NOT NULL
 		DEFAULT CURRENT_TIMESTAMP
 		ON UPDATE CURRENT_TIMESTAMP'
 	);
-
 	db_query('
 		ALTER TABLE {shared_members}
 		MODIFY sh_shared_time TIMESTAMP NOT NULL
-		DEFAULT CURRENT_TIMESTAMP
-		ON UPDATE CURRENT_TIMESTAMP'
+		DEFAULT CURRENT_TIMESTAMP'
 	);
+
+	//foreign key constraints
+	//schema API foreign keys option is only for documentation purposes 
+	//so we need explicitly add fkey constraints and options(delete,update ..) in install function
+	db_query('
+		ALTER TABLE {folders}
+		ADD CONSTRAINT {LMS_folder_owner_constraint}
+		FOREIGN KEY (uid) REFERENCES {users} (uid)
+		ON DELETE CASCADE
+	');	
+	db_query('
+		ALTER TABLE {folders}
+		ADD CONSTRAINT {LMS_folder_class_constraint}
+		FOREIGN KEY (class_code) REFERENCES {classes} (code)
+	');
+	db_query('
+		ALTER TABLE {shared_members}
+		ADD CONSTRAINT {LMS_sharedmem_folder_constraint}
+		FOREIGN KEY (folder_num) REFERENCES {folders} (folder_num)
+		ON DELETE CASCADE
+	');
+	db_query('
+		ALTER TABLE {shared_members}
+		ADD CONSTRAINT {LMS_sharedfolder_member_constraint}
+		FOREIGN KEY (uid) REFERENCES {users} (uid)
+		ON DELETE CASCADE
+	');
 }
 
 function NC_models_uninstall(){
 	db_query('
-		DROP TABLE folders;
-	');
-
-	db_query('
 		DROP TABLE shared_members;
+	');
+	db_query('
+		DROP TABLE folders;
 	');
 }

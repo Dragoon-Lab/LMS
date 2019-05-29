@@ -103,6 +103,7 @@ function class_assignments_handle_assignment($code){
 				$sm = $props["sm"];
 				$sec = $props["s"];
 				$is = $props["is"];
+				$fp = $props["fp"];
 				$addGroup = "";
 				if(isset($props["g"]) && $props["g"] != ""){
 					$grp = $props["g"];
@@ -117,11 +118,31 @@ function class_assignments_handle_assignment($code){
 								<input type='hidden' name='m' value='$mode'>
 								<input type='hidden' name='sm' value='$sm'>
 								<input type='hidden' name='s' value='$sec'>
+								<input type='hidden' name='fp' value='$fp'>
 								<input type='hidden' name='is' value='$is'>".
 								$addGroup."
 							</form>";
+									//retrieve the sd 
+					if(has_system_descriptions()){
+						//paste the sd link
+						$sd_id_q = db_select('assignment_sds','asd')
+						->fields('asd',array('sd_id'))
+						->condition('assignment_id',$assignment_id)
+						->execute();
+						$sd_id_ar = $sd_id_q->fetchAssoc();
+						if(isset($sd_id_ar['sd_id'])){
+							//sd exists
+							$sd_path_q = db_select('system_descriptions','sdp')
+										->fields('sdp', array('sd_path'))
+										->condition('sd_id', $sd_id_ar['sd_id'])
+										->execute();
+							$sd_path_ar = $sd_path_q->fetchAssoc();
+							$sd_path = $sd_path_ar['sd_path'];
+							$echo = $echo."<div id='assignment_sd_path' style='display: none'>".$sd_path."</div>";
+						}
+					}
 
-				if($props["m"] != "AUTHOR"){
+				if( ($props["m"] != "AUTHOR" && $props["m"] != "SEDITOR") ){
 					//redirect to dragoon
 					//add an additional property of user name
 					$echo = $echo."<div id='cardReader' style='display: none;'>nonAuthor</div>";
@@ -131,7 +152,8 @@ function class_assignments_handle_assignment($code){
 					$echo = $echo."<div id='cardReader' style='display: none;'>Author</div>";
 
 					//attach the folder modal
-					$userFoldersList  = loadUserFolders2($user->name);
+					$user_det = array('uid' => $user->uid, 'uname' => $user->name);
+					$userFoldersList  = loadUserFolders2($user_det);
 					$options = "";
 					foreach($userFoldersList as $fid => $fname){
 						$options = $options. "<option value='".$fid."'>".$fname."</option>";

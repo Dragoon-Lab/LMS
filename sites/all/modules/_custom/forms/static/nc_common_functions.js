@@ -3,6 +3,7 @@ var isNameEmpty;
 var lengthExceeded;
 var checkSpecialChars;
 var showErrorTextbox;
+var emptyTextbox;
 jQuery(document).ready(function($) {
 	
 	//checks if new folder name/model name is empty
@@ -27,7 +28,15 @@ jQuery(document).ready(function($) {
 		var cur_element = $('#'+ element);
 		cur_element.val('');
 		cur_element.addClass('focusedtextselect');
-		cur_element.attr("placeholder", message);			
+		cur_element.attr('placeholder', message);			
+	}
+
+	//empty and remove any focussed classes from a textbox
+	emptyTextbox = function(/*string*/ element, /*string*/ message){
+		var cur_element = $('#'+ element);
+		cur_element.val('');
+		cur_element.removeClass('focusedtextselect');
+		cur_element.attr('placeholder', message);	
 	}
 
 });

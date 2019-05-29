@@ -1,201 +1,205 @@
-jQuery(document).ready(function($) {
+(function($) {
+	Drupal.behaviors.handleMoveCopy = {
+		attach: function(context, settings){
+			var model_select = $('#select_source_model');
+			var dest_select = $('#select_destination_folder');
+			var src_select = $('#select_source_folder');
+			var add_newname = $('#rename_model_check');
+			var add_newname_div = $('#rename_model_check_div');
+			var model_newname = $('#model_newname');
+			var model_newname_div = $('#model_newname_div');
+			var cp_button = $('#cp_model_but');
+			var mv_button = $('#mv_model_but');
+			var form = document.forms['dragoon_nc_move_models'];
+			var current_op = "";
+			var current_src_options;
+			var current_button;
 
-	var model_select = $('#select_source_model');
-	var dest_select = $('#select_destination_folder');
-	var src_select = $('#select_source_folder');
-	var move_button = $('#move_model');
-	var copy_button = $('#copy_model');
+			//helper functions
 
-	$('.modAction').on("click",function(){
-	   console.log($(this).html());
-		var form = document.forms['dragoon_nc_move_models'];
-		if($(this).html()=="Copy Models"){
-		   move_button.hide();
-		   copy_button.show();
-		   src_select.find('option').remove();
-		   var new_folders2 = form["source_folder_data2"].value;
-		   new_folders2 = jQuery.parseJSON(new_folders2);
-		   for(var key in new_folders2){
-			   var temp_option2 = new Option(new_folders2[key],key);
-			   src_select.append($(temp_option2));
-		   }
-		}
-		else{
-		   copy_button.hide();
-		   move_button.show();
-		   src_select.find('option').remove();
-		   var new_folders = form["source_folder_data"].value;
-		   new_folders = jQuery.parseJSON(new_folders);
-		   for(var key in new_folders){
-			   var temp_option = new Option(new_folders[key],key);
-			   src_select.append($(temp_option));
-		   }
-		}
-		//call adjustModels initially to load models corresponding to the folders
-		adjustModels();
-	});
+			//updates button (move or copy) based on user choice
+			var update_button = function(src_button, enable){
+				cp_button.hide(); mv_button.hide();
+				if(src_button == "Copy Models"){
+					current_button = cp_button;
+				}
+				else if(src_button == "Move Models"){
+					current_button = mv_button;
+					add_newname_div.hide();
+					model_newname_div.hide();
+				}
+				current_button.show();
+				current_button.attr("disabled",true);
+			};
 
+			//refreshes select field : enables, removes current options and updates options
+			var refresh_select = function(current_select, new_options){
+				
+				//enable in case disabled
+				current_select.attr("disabled", false);
 
-	//function 1 Adjust Models function loads models to select models section based on the current folder
-	var adjustModels = function(){
-		var current_folder = src_select.val();
-		//console.log("current folder",current_folder);
-		//make a call to Dragoon API to get models for the current folder
-		$.ajax({
-			type: "POST",
-			url: $("#dragoon_url").val()+"global.php",
-			data: {
-				"t": "reqNonClassProblems",
-				"g" : current_folder
-			},
-			success: function (data) {
-				console.log("success");
-				var model_data = jQuery.parseJSON(data);
-				console.log(model_data)
-				if(model_data["error"] !== undefined){
-					var option1 = new Option("No modes found in current folder", "None");
-					var option2 = new Option("Select a model to move or copy","None");
-					model_select.append($(option1));
-					dest_select.append($(option2));
-					model_select.val("None");
-					dest_select.val("None");
-					model_select.attr("disabled",true);
-					dest_select.attr("disabled",true);
-					buttonHandler(true);
+				//remove any options from current select, before replenishing
+				current_select.find('option').remove();
+
+				//replace options from new_options
+				for(var key in new_options){
+					var temp_option = new Option(new_options[key],key);
+					current_select.append($(temp_option));
+				}
+			}
+
+			// updates the model and destination selects when no data received
+			// either because the current folder has no models or query has failed
+			var no_data_received = function(message){
+				//update model select and disable
+				refresh_select(model_select, message);
+				model_select.attr("disabled",true);
+				
+				//update dest select and disable
+				refresh_select(dest_select, message);
+				dest_select.attr("disabled",true);
+
+				//disable new model name textfield
+				if(current_op == "Copy Models"){
+					add_newname_div.hide();
+					model_newname_div.hide();					
+				}
+				//disable copy/move button
+				current_button.attr("disabled", true);
+			}
+
+			//handle new name for models
+			//only for copy models case
+			var handle_model_name = function(same_folder){
+				add_newname_div.hide();
+				model_newname_div.hide();
+				if(same_folder){
+					model_newname_div.show();
 				}
 				else{
-					model_select.attr("disabled",false);
-					model_select.find('option').each(function(){ $(this).remove();});
-					for(var key in model_data){
-						var temp_option = new Option(key,model_data[key]);
-						model_select.append($(temp_option));
-					}
-					//if a model is available to copy/move to a destination
-					//Enable the select destination box removing the source folder from list
-					dest_select.attr("disabled",false);
-					//remove all current options
-					dest_select.find('option').remove();
-					//add all options from source except the current one
-					src_select.find('option').each(function(){
-						if($(this).val() !== src_select.val()) {
-							var temp_option = $(this).clone();
-							dest_select.append(temp_option);
-						}
-					});
-					buttonHandler(false);
+					add_newname_div.show();
 				}
-			},
-			error: function (data) {
-				console.log(data,"failed");
 			}
 
-		});
+			
+			//sets up the user form based on user choice
+			var mvcp_form_setup = function(src_button){
+				
+				update_button(src_button,false);
+		
+				var new_folders;
+				if(src_button == "Copy Models"){
+					new_folders = form["source_folder_data2"].value;
+				}
+				else if(src_button == "Move Models"){
+					new_folders = form["source_folder_data"].value;
+				}
 
-	};
-	//function 2 buttonHandler either disables or enables the move/copy buttons based on the select boxes
-	var buttonHandler = function(status){
-		$('#move_model').attr("disabled",status);
-		$('#copy_model').attr("disabled",status);
-	   // $('#move_model').attr("title")
-	};
-	//function 3 callServer calls server requesting to move or copy a model
-	var modelAction = function(action){
-		var form = document.forms['dragoon_nc_move_models'];
-		var user = form["u"].value;
-                var model_mode = form["m"].value;
-		$.ajax({
-			type: "POST",
-			url: $("#dragoon_url").val()+"global.php",
-			data: {
-				"t": "modelAction",
-				"action": action,
-				"src": src_select.val(),
-				"mod": model_select.val(),
-				"dest": dest_select.val(),
-				"user": user,
-                                "mode": model_mode,
-				"section": "non-class-models"
-			},
-			success: function (data) {
-				console.log("moved", data);
-				location.reload();
-			},
-			error: function (data) {
-				console.log("move failed", data);
-			}
-		});
-		//the following call requests nonClassUpdates to perform changes upon move/copy a model which are to be performed on LMS side
-		$.ajax({
-			type: "POST",
-			url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
-			data: {
-				"req_type": "modelAction",
-				"action": action,
-				"src": src_select.val(),
-				"dest": dest_select.val(),
-			},
-			success: function(data){
-				console.log("sys desc", data);
-			},
-			error: function(data){
-				console.log("failed",data);
-			}
-		});
-	};
+				current_src_options = $.parseJSON(new_folders);
+				//update the src folders select
+				refresh_select(src_select, current_src_options);
+				src_select.trigger('change');
+			};
 
-	//event 1 : change in source folder value
-	src_select.on("change",function(){
-		console.log("changed");
-		adjustModels();
-	});
-	//event2 : Copy/Move Models via button clicks
-	move_button.on("click", function(e){
-		e.preventDefault();
-		$('#confirmModelCopy').modal('show');
-		$('#confirmModelCopy .modal-body').html('<p>Are you sure you want to move model <b style="color: #000011">'+model_select.val()+'</b> from <b style="color: #000011">'+ src_select.val()+ '</b> to <b style="color: #000011">'+ dest_select.val() +'</b> ?</p>');
-		$('#copyModelConfirmed').on("click", function(){ modelAction("moveModel"); });
-	});
+			//updates model list and destination list based on current folder
+			var update_mvcp_options = function(src_data){
+				var current_folder = src_select.val();
+				
+				//make a call to Dragoon API to get models for the current folder
+				$.ajax({
+					type: "POST",
+					url: $("#dragoon_url").val()+"global.php",
+					data: {
+						"t": "reqNonClassProblems",
+						"g" : current_folder
+					},
+					success: function (data) {
+						console.log("success");
+						//incase of api side query fail or any another issue
+						//an error object is returned ({ 'error': 'No Models'})
+						var model_data = $.parseJSON(data);
+						if(model_data["error"] !== undefined){
+							//no data received
+							var empty_option = {"none": "Selected folder is empty"};
+							no_data_received(empty_option);
+						}
+						else{
+							//update model select using data got back
+							refresh_select(model_select, model_data);
 
-	copy_button.on("click", function(e){
-		e.preventDefault();
-		$('#confirmModelCopy').modal('show');
-		$('#confirmModelCopy .modal-body').html('<p>Are you sure you want to copy model <b style="color: #000011">'+model_select.val()+'</b> from <b style="color: #000011">'+ src_select.val()+ '</b> to <b style="color: #000011">'+ dest_select.val() +'</b> ?</p>');
-		$('#copyModelConfirmed').on("click", function(){ 
-			//final checks have to be performed to confirm if the user is still shared the folder 
-			//from which he wants to copy the folder
-			var form = document.forms['dragoon_nc_move_models'];
-			var user = form["u"].value;
-			var owner = src_select.val().split("-");
-			//owner(user) name is either the format of user-private or folder-user
-			//so upon split the following check confirms sharing case    
-			if(owner[0] == user || owner[1] == user)
-				modelAction("copyModel");
-			else{
-				console.log("contacting check sharing");
-				$.when(checkSharing(src_select.val(),user)).done(function(share_check){
-					console.log(typeof share_check, share_check);
-					if(share_check == '0'){
-						console.log("indicate lack of sharing");
-						$('#alertDisabledSharing').modal('show');
-						return;
-					} 
-					modelAction("copyModel");
+							//console.log(select_data, current_folder);
+							//update destination select with all source folders except current folder
+							refresh_select(dest_select, src_data);
+							//if current option is move models, remove moving to same folder option
+							console.log("update mvcp options fired", current_op);
+							var dest_folder = dest_select.val();
+							if(current_op == "Move Models")
+								dest_select.find('option[value="'+current_folder.trim()+'"]').remove();
+							else
+								//handle model new name
+								handle_model_name(current_folder == dest_folder); 
+							//enable the copy/move button
+							current_button.attr("disabled", false);
+						}
+					},
+					error: function (data) {
+						console.log(data,"failed");
+						var failed_option = {"none": "Something went wrong! try again later"};
+						no_data_received(failed_option);
+					}
 				});
-			}
-			//modelAction("copyModel"); 
-		});
-	});
-	var checkSharing = function(folder_id,user){
-		return $.ajax({
-			type: "POST",
-			url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
-			data: {'folder_id': folder_id, 'req_type': 'checkSharing', 'user': user},
-			success: function (data) {
-				console.log("success");
-			},
-			error: function (data) {
-				console.log("fail");
-			}
-		});
-	};
-});
+			};
+
+			//Events related to move/copy form
+
+			//modAction is the class attribute of move and copy model buttons
+			$('.modAction').on("click",function(){
+				console.log($(this).html());
+				current_op = $(this).html();
+				mvcp_form_setup(current_op);
+
+			});
+
+			$('#select_source_folder').on("change", function(){
+				update_mvcp_options(current_src_options);
+			});
+
+			dest_select.on("change", function(){
+				if(current_op == "Copy Models"){
+					var select_folder = src_select.val();
+					var dest_folder = dest_select.val();
+					handle_model_name(select_folder == dest_folder);
+				}
+
+			});
+
+			add_newname.on("change", function(){
+				model_newname_div.hide();
+				if(this.checked){
+					model_newname_div.show();
+				}
+			});
+
+			cp_button.on("click", function(e){
+				e.preventDefault();
+				var model_name = model_newname.val();
+				if(model_name == "" && !(model_newname_div.css('display') == 'none')){
+					console.log("new name empty", add_newname.checked, model_newname.val());
+					showErrorTextbox("model_newname","Empty value");
+					return;
+				}
+				if(model_name != "" && !(model_newname_div.css('display') == 'none')){
+					//length exceeded case handled with maxlength attribute
+					//special characters case
+					if(checkSpecialChars(model_name)){
+						showErrorTextbox("model_newname","special characters not allowed");
+						return;
+					}
+				}
+				$(this).trigger('copy_authenticated');
+						
+			});
+
+		}
+	}
+})(jQuery);

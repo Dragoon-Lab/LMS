@@ -38,6 +38,11 @@ function problem_form($form, &$form_state){
 		'#value' => $name,
 	);
 
+	$form['uid'] = array(
+		'#type' => 'hidden',
+		'#value' => $user->uid,
+	);
+
 	$form['is'] = array(
 		'#type' => 'hidden',
 		'#value' => 'algebraic',
@@ -46,8 +51,8 @@ function problem_form($form, &$form_state){
 	$form['s'] = array(
 		'#type' => 'hidden',
 		'#value' => 'public-login',
-	);
-
+	)
+;
 	$form['rp'] = array(
 		'#type' => 'hidden',
 		'#value' => 'off',
@@ -100,6 +105,7 @@ function problem_form($form, &$form_state){
 		'#prefix' => '<div class="mt-10" id="submit_but_container">',
 		'#suffix' => "</div><div id='popup_blocker_alert_msg'>If the problem does not open, check to see if your browser's pop-up blocker has blocked it</div>", 
 	);
+
 	$tutor_name = get_tutor_name();
 	$form['tutor_name'] = array(
 		'#type' => 'hidden',
