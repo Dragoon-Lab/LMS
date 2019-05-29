@@ -184,7 +184,19 @@
 										</div>
 									</div>
 								</div>
-							</div>							
+							</div>	
+							<div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="loader"></div>
+        <div clas="loader-txt">
+          <p>Please wait while we rename your folder <br><br><small>Thanks for your patience</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>						
 							';
 		return $common_blocks;
 	}

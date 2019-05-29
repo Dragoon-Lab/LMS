@@ -32,7 +32,7 @@ function forms_nc_create_model_form($form, &$form_state){
 
 	$form['m'] = array(
 		'#type' => 'hidden',
-		'#value' => 'AUTHOR'
+		'#value' => in_array('teacher', $user->roles) ? "AUTHOR" : "SEDITOR"
 	);
 
 	$form['a'] = array(

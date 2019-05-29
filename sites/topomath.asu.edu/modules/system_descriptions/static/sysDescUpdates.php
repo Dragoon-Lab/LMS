@@ -11,7 +11,18 @@ take_action($request_type);
 //All take actions require a working db connection
 function take_action($case=" "){
 	$section = isset($_REQUEST['s'])?$_REQUEST['s']:null;
-	$folder = isset($_REQUEST['f'])?$_REQUEST['f']:null;
+	$folder_id = isset($_REQUEST['f'])?$_REQUEST['f']:null;
+	$folder = "";
+	if($folder_id){
+		//retrieve folder id
+		$fol_num_q = db_select('folders','f');
+		$fol_num_q->fields('f', array('folder_num'));
+		$fol_num_q->condition('folder_id',$folder_id);
+		$fol_num_res = $fol_num_q->execute();
+		$fol_num_ar = $fol_num_res->fetchAssoc();
+		$folder = $fol_num_ar['folder_num'];
+		
+	}
 	$prob = isset($_REQUEST['p'])?$_REQUEST['p']:null;
 			
 	switch ($case) {
@@ -24,9 +35,9 @@ function take_action($case=" "){
 			$q_res = $query=db_insert('system_descriptions')
 				->fields(array(
 					'sd_name' => ''.$name,
-					'sd_folder' => ''.$folder,
-					'sd_uname' => ''.$user,
-					'sd_pname' => ''.$prob,
+					'folder_num' => ''.$folder,
+					'uid' => ''.$user,
+					'sd_model' => ''.$prob,
 					'sd_section' => ''.$section,
 					'sd_path' => ''.$path,
 					'sd_type' => ''.$type
@@ -37,7 +48,7 @@ function take_action($case=" "){
 		case "refresh_list":
 			//refreshes the list of descriptions to list to the user
 			$return_list = array();
-			$cond = db_and()->condition('sd_folder',$folder)->condition('sd_pname',$prob)->condition('sd_section',$section);
+			$cond = db_and()->condition('folder_num',$folder)->condition('sd_model',$prob)->condition('sd_section',$section);
 			$query = db_select('system_descriptions','sh')
 					->fields('sh',array('sd_name','sd_path','sd_type'))
 					->condition($cond)->execute();
@@ -50,10 +61,25 @@ function take_action($case=" "){
 			print_r(json_encode($desc_list));	
 			break;
 
+		case "sds_assignments":
+			$return_list = array();
+			$cond = db_and()->condition('folder_num',$folder)->condition('sd_model',$prob)->condition('sd_section',$section);
+			$query = db_select('system_descriptions','sh')
+					->fields('sh',array('sd_name','sd_id'))
+					->condition($cond)->execute();
+			$desc_list = array();
+			while($sds = $query->fetchAssoc()){
+					//echo $sds["sd_name"]." : ".$sds["sd_path"].",";
+					$desc_list[$sds["sd_id"]] = $sds["sd_name"];
+				}
+			print_r(json_encode($desc_list));	
+			break;
+
+
 		case "name_duplication":
 			//checks if system description name is duplicate
 			$sys_name = isset($_REQUEST['n'])?$_REQUEST['n']:null;
-			$cond = db_and()->condition('sd_folder',$folder)->condition('sd_name',$sys_name)->condition('sd_section',$section)->condition('sd_pname', $prob);
+			$cond = db_and()->condition('folder_num',$folder)->condition('sd_name',$sys_name)->condition('sd_section',$section)->condition('sd_model', $prob);
 			$check_q = db_select('system_descriptions','sh')->fields('sh',array('sd_name'))->condition($cond)->execute();
 			//$check_q = "select * from folders where folder_id='$folder_id'";
 			$row_count = $check_q->rowCount();

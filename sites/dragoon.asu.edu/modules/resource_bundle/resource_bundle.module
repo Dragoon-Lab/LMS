@@ -51,3 +51,11 @@ function get_create_assignment_options(){
 
 	return $options;
 }
+
+function has_system_descriptions(){
+	return false;
+}
+
+function get_tutor_name(){
+	return "dragoon";
+}

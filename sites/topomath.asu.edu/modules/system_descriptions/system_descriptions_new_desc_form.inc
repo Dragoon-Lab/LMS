@@ -42,10 +42,10 @@ function system_descriptions_new_desc_form($form, &$form_state){
 		)
 	);
 
-	$form['folder_name'] = array(
+	$form['folder_num'] = array(
 		'#type' => 'hidden',
 		'#attributes' => array(
-			'id' => 'folder_name'
+			'id' => 'folder_num'
 		)
 	);
 
@@ -56,10 +56,10 @@ function system_descriptions_new_desc_form($form, &$form_state){
 		)
 	);
 
-	$form['user_name'] = array(
+	$form['user_id'] = array(
 		'#type' => 'hidden',
 		'#attributes' => array(
-			'id' => 'user_name'
+			'id' => 'user_id'
 		)
 	);
 
@@ -70,9 +70,25 @@ function system_descriptions_new_desc_form_validate($form, &$form_state){
 	$pname = isset($_REQUEST['p'])?$_REQUEST['p']:null;
 	$fname = isset($_REQUEST['f'])?$_REQUEST['f']:null;
 	$sname = isset($_REQUEST['s'])?$_REQUEST['s']:null;
-	$uname = isset($_REQUEST['u'])?$_REQUEST['u']:null;
+	$uid = isset($_REQUEST['u'])?$_REQUEST['u']:null;
 	$name = $form_state['values']['file_name_html'];
-	$cond = db_and()->condition('sd_folder',$fname)->condition('sd_name',$name)->condition('sd_section',$sname)->condition('sd_pname', $pname);
+
+	$folder_num = "";
+	if($fname){
+		//retrieve folder num
+		$fol_num_q = db_select('folders','f');
+		$fol_num_q->fields('f', array('folder_num'));
+		$fol_num_q->condition('folder_id',$fname);
+		$fol_num_res = $fol_num_q->execute();
+		$fol_num_ar = $fol_num_res->fetchAssoc();
+		$folder_num = $fol_num_ar['folder_num'];
+	}
+
+
+
+
+
+	$cond = db_and()->condition('folder_num',$folder_num)->condition('sd_name',$name)->condition('sd_section',$sname)->condition('sd_model', $pname);
 	$check_q = db_select('system_descriptions','sh')->fields('sh',array('sd_name'))->condition($cond)->execute();
 	$row_count = $check_q->rowCount();
 	if($row_count>0){
@@ -82,17 +98,17 @@ function system_descriptions_new_desc_form_validate($form, &$form_state){
 	}
 			
 	form_set_value($form['problem_name'], $pname, $form_state);
-	form_set_value($form['folder_name'], $fname, $form_state);
+	form_set_value($form['folder_num'], $folder_num, $form_state);
 	form_set_value($form['section_name'], $sname, $form_state);			
-	form_set_value($form['user_name'], $uname, $form_state);
+	form_set_value($form['user_id'], $uid, $form_state);
 }
 
 function system_descriptions_new_desc_form_submit($form, &$form_state){
 			//add the new description to data base from the input parameters
 			$name = $form_state['values']['file_name_html'];
-			$user = $form_state['values']['user_name'];
+			$user = $form_state['values']['user_id'];
 			$section = $form_state['values']['section_name'];
-			$folder = $form_state['values']['folder_name'];
+			$folder = $form_state['values']['folder_num'];
 			$prob = $form_state['values']['problem_name'];
 			$content = $form_state['values']['editor_info'];
 			$path = (time()*1000).$name.".html";
@@ -101,9 +117,9 @@ function system_descriptions_new_desc_form_submit($form, &$form_state){
 			$q_res = $query=db_insert('system_descriptions')
 				->fields(array(
 					'sd_name' => ''.$name,
-					'sd_folder' => ''.$folder,
-					'sd_uname' => ''.$user,
-					'sd_pname' => ''.$prob,
+					'folder_num' => ''.$folder,
+					'uid' => ''.$user,
+					'sd_model' => ''.$prob,
 					'sd_section' => ''.$section,
 					'sd_path' => ''.$path,
 					'sd_type' => ''.$type

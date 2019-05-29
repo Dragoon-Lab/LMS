@@ -1,5 +1,6 @@
 jQuery(document).ready(function($) {
 	var form = document.forms['create_assignment_form'];
+	var tutor = form["tutor_name"].value;
 	var submitForm = function(){
 		if(form.create_session.value){
 			var g = form.g && form.g.value ? form.g.value : "";
@@ -24,6 +25,11 @@ jQuery(document).ready(function($) {
 			form.create_session.value = false;
 		}
 		enableLockNodes(false);
+		if(tutor == "topo"){
+			enableGiveParams(false);
+			enableGiveSchemas(false);
+		}
+		updateSystemDescriptions();
 	};
 
 	var createSession = function(p, s, g, aname){
@@ -87,12 +93,87 @@ jQuery(document).ready(function($) {
 		form['fp'].value = "off";
 	}
 
+	var enableGiveParams = function(/* status */ status){
+		if(status){
+			$('#gp_checkbox_container').show();
+		}
+		else{
+			$('#gp_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#gp_checkbox').prop('checked',false);
+		form['gp'].value = "off";
+	}
+
+	var enableGiveSchemas = function(/* status */ status){
+		if(status){
+			$('#gs_checkbox_container').show();
+		}
+		else{
+			$('#gs_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#gs_checkbox').prop('checked',false);
+		form['gs'].value = "off";
+	}
+
+	var updateSystemDescriptions = function(){
+		//if the current site is topomath, system descriptions for the current problem have to be loaded
+		console.log("update system descriptions called");
+		if($('#assignment_def_sd').length){
+			//send a request to load sds
+			var folder = form.g && form.g.value ? form.g.value : "";
+			var problem = form["pname"].value;
+			var section = "non-class-models";
+			var sd_update_handler = "sites/topomath.asu.edu/modules/system_descriptions/static/sysDescUpdates.php";
+			var input = {
+				f: folder,
+				p: problem,
+				s: section,
+				req_type: "sds_assignments"
+			}
+			console.log("input data sent", input);
+			$.post(sd_update_handler, input)
+				.success(function (datum) {
+					console.log("received",datum);
+					var sys_json = JSON.parse(datum);
+					$("#assignment_def_sd").find('option').remove();
+					if(!$.isEmptyObject(sys_json)){
+						$.each(sys_json, function(key,value){
+						var o = new Option(value, key);
+						$('#assignment_def_sd').append($(o));
+					})						
+					}
+					else{
+						var o = new Option("No system descriptions found",0);
+						$('#assignment_def_sd').append($(o));
+					}
+
+			});
+		}
+	}
+
 	$('#ln_checkbox').change(function(){
 		var checked = $("input[name='ln_checkbox']:checked").val();
 		if(checked)
 			form["fp"].value = 'on';
 		else
 			form["fp"].value = 'off';
+	});
+
+	$('#gs_checkbox').change(function(){
+		var checked = $("input[name='gs_checkbox']:checked").val();
+		if(checked)
+			form["gs"].value = 'on';
+		else
+			form["gs"].value = 'off';
+	});
+	$('#gp_checkbox').change(function(){
+		var checked = $("input[name='gp_checkbox']:checked").val();
+		if(checked)
+			form["gp"].value = 'on';
+		else
+			form["gp"].value = 'off';
 	});
 
 	$('#form_open_radios').change(function(){
@@ -102,9 +183,17 @@ jQuery(document).ready(function($) {
 		console.log(mode, "is ");
 		if(mode == "AUTHOR"){
 			enableLockNodes(false);
+			if(tutor == "topo"){
+				enableGiveParams(false);
+				enableGiveSchemas(false);
+			}
 		}
 		else{
 			enableLockNodes(true);
+			if(tutor == "topo"){
+				enableGiveParams(true);
+				enableGiveSchemas(true);
+			}
 		}
 
 	});

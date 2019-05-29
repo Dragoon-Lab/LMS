@@ -33,7 +33,8 @@ function get_create_assignment_options(){
 		$options = array(
 			'#options' => array(
 				'STUDENT|construction' => t('Reconstruct the model - Feedback on entries and graphs'),
-				'AUTHOR|construction' => t('Edit the model'),
+				'AUTHOR|construction' => t('Author the model'),
+				'SEDITOR|construction' => t('Edit the model'),
 				'NOFEEDBACK|construction' => t('Reconstruct the model - No feedback')
 			),
 			'#title' => t('Select a method to start TopoMath problem'),
@@ -42,4 +43,12 @@ function get_create_assignment_options(){
 	}
 
 	return $options;
+}
+
+function has_system_descriptions(){
+	return true;
+}
+
+function get_tutor_name(){
+	return "topo";
 }

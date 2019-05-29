@@ -116,6 +116,7 @@ jQuery(document).ready(function($) {
 	});
 
 	//event 3 , on clicking the rename button
+	/*
 	rename_button.on("click",function(e){
 		e.preventDefault();
 		var new_val = new_name.val();
@@ -148,8 +149,20 @@ jQuery(document).ready(function($) {
 		}
 
 		rename_button.trigger("renameItemEvent");
-	});
+	}); */
 
 	item_to_rename.change(changeRenameOption);
+
+	rename_button.on("click", function(e) {
+    e.preventDefault();
+    $("#loadMe").modal({
+      backdrop: "static", //remove ability to close modal with click
+      keyboard: false, //remove option to close with keyboard
+      show: true //Display loader!
+    });
+    setTimeout(function() {
+      $("#loadMe").modal("hide");
+    }, 3500);
+  });
 	
 });

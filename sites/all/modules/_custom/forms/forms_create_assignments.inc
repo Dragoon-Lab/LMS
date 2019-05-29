@@ -33,6 +33,15 @@ function create_assignment_form($form, &$form_state){
 		$form['m'][$option] = $value;
 	}
 
+	if(has_system_descriptions()){
+		$form['sd'] = array(
+			'#id' => 'assignment_def_sd',
+			'#type' => 'select',
+			'#validated' => TRUE,
+			'#title' => t('Choose System description'),
+		);
+	}
+
 	$form['p'] = array(
 		'#type' => 'hidden',
 	);
@@ -72,13 +81,38 @@ function create_assignment_form($form, &$form_state){
 		'#prefix' => '<div id="ln_checkbox_container" class="element-hide">',
 		'#suffix' => '</div>'
 	);
-
+	$form['gp'] = array(
+		'#type' => 'hidden',
+		'#value' => 'off',
+	);
+	$form['gp_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Give parameters'),
+		'#id' => 'gp_checkbox',
+		'#prefix' => '<div id="gp_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+	$form['gs'] = array(
+		'#type' => 'hidden',
+		'#value' => 'off',
+	);
+	$form['gs_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Give Schema(DRT)'),
+		'#id' => 'gs_checkbox',
+		'#prefix' => '<div id="gs_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
+	);
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Create Assignment'),
 		'#id' => 'submit_button',
 	);
-
+	$tutor_name = get_tutor_name();
+	$form['tutor_name'] = array(
+		'#type' => 'hidden',
+		'#value' =>	$tutor_name,
+	);
 	return $form;
 }
 
@@ -106,7 +140,7 @@ function create_assignment_form_submit($form, &$form_state){
 	module_load_include('inc', 'forms', 'forms_utils');
 	$code = get_code(12);
 	if(!(strpos($form_state['values']['create_session'], "error" !== false))){
-		db_insert('assignments')
+		$last_id = db_insert('assignments')
 			->fields(array(
 				'assignment_name' => $form_state['values']['aname'],
 				'assignment_id' => $code,
@@ -114,5 +148,13 @@ function create_assignment_form_submit($form, &$form_state){
 				'problem' => $form_state['values']['aname'],
 				'problem_properties' => $params
 			))->execute();
+
+		if(isset($form_state['values']['sd']) && $form_state['values']['sd'] != 0){
+			db_insert('assignment_sds')
+			->fields(array(
+				'assignment_id' => $code,
+				'sd_id' => $form_state['values']['sd']
+			))->execute();
+		}
 	}
 }

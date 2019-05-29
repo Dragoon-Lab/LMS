@@ -101,8 +101,8 @@ function system_descriptions_block_info(){
 	$blocks['edit_system_descriptions'] = array(
 		'info' => 'Block for editing system descriptions',
 	);
-	$blocks[''] = array(
-		'info' => 'Block for '
+	$blocks['manage_system_descriptions'] = array(
+		'info' => 'Block for managing system descriptions'
 	);
 	return $blocks;
 }
@@ -152,6 +152,41 @@ function system_descriptions_block_view($delta = ""){
 				);
 			}
 			break;
+		case "manage_system_descriptions" :
+			module_load_include('inc', 'system_descriptions', 'manage_system_descriptions_form');
+			$form = drupal_get_form('manage_system_descriptions_form');
+			$block['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array(
+						drupal_get_path('module', 'system_descriptions') . '/static/sys_desc.js',
+					)
+				),
+				'#prefix' => '
+				<div id="handleSystemDesc" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+		<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">View/Edit/Delete descriptions</h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>   
+				</div>
+				<div class="modal-body">
+					<div id="list-sys-descriptions"></div>
+					<div id="sysDesc-error-box" style="color: red">
+					</div>
+					<div class="progress">
+						<div class="progress-bar" role="progressbar"></div>
+					</div>
+',
+				'#suffix' => '<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal" id="">Done</button>
+			</div>
+		</div>
+	</div>
+</div>', 
+			);
+		break;
 	}
 
 	return $block;

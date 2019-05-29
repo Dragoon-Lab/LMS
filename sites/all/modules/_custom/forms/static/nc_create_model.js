@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
 		else
 			folder_name = "private";
 
-		//console.log("existing models",existing_models,folder_name,model_name);
+		console.log("existing models",existing_models,folder_name,model_name);
 		var toCheck=JSON.parse(existing_models);
 		if(folder_name != ""){
 			$.each(toCheck.private,function(key,val){

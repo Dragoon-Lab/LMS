@@ -3,6 +3,8 @@
  */
 jQuery(document).ready(function($) {
 	var action = $('#cardReader').text();
+	var sd_path = $('#assignment_sd_path').text();
+	var upload_dir = 'sites/topomath.asu.edu/modules/system_descriptions/uploads/';
 	var form = document.forms['nonAuthData'];
 	if(form){
 		var url = $("#dragoon_url").val()+"index.php";
@@ -65,4 +67,7 @@ jQuery(document).ready(function($) {
 	});
 
 	$('#messageReader').html('Your problem has been opened in new tab. If no new tab appeared, disable popup blocking for this website and try again. To open the problem again, refresh this page or visit the link again.');
+	if(sd_path){
+		$('#messageReader').append("<br/>please check sd <a href='"+upload_dir+sd_path+"'>here</a>");
+	}
 });
