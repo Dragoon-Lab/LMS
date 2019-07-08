@@ -39,11 +39,10 @@ jQuery(document).ready(function($) {
                 },
                 success: function (data) {
                     console.log(data);
-                    //location.reload();
+                    location.reload();
                 },
                 error: function (data) {
-
-                    console.log("fail");
+                    console.error("delete failed");
                 }
 
             });
