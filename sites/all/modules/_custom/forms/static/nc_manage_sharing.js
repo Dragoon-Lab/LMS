@@ -51,38 +51,6 @@ jQuery(document).ready(function($) {
 
     });
 
-    $("#shareHoldersList").on("click","i.glyphShare",function(){
-        var current_glyph = this;
-        $('#confirmRemoveShare').modal('show');
-
-        $('#removeShareConfirmed').click(function () {
-            $(current_glyph).closest('tr').remove();
-            //send an ajax request to complete delete share holder
-            var form = document.forms['dragoon_nc_manageSharing'];
-            //console.log(form["select_folder"].value,$(current_glyph).closest('tr').find('td span:first').text());
-
-            $.ajax({
-                type: "POST",
-                url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
-                data: {
-                    "req_type": "deleteShareHolder",
-                    "folder_id": form["select_folder"].value,
-                    "user_id": $(current_glyph.closest('tr')).find('td span:first').text()
-                },
-                success: function (data) {
-                    console.log(data);
-                    //location.reload();
-                },
-                error: function (data) {
-
-                    console.log("fail");
-                }
-
-            });
-
-        });
-    });
-
     //sharing a user to a folder
     $('#shareAuser').on("click",function(e){
         e.preventDefault();
