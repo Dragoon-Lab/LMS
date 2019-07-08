@@ -164,7 +164,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 				$user_email = $_REQUEST["user_email"];
 				$folder_id = $_REQUEST["folder_id"];
 				$query = db_select('users','u')
-						->fields('u',array('uid'))
+						->fields('u',array('uid','name'))
 						->condition('mail',$user_email)
 						->execute();
 				$count = $query->rowCount();
@@ -202,8 +202,10 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 										"folder_num" => $folder_num,
 										"member_relation" => 0
 										))->execute();
-							if($mem_q)
-								echo "success"."-".$username;
+							if($mem_q){
+								$userName = $udet['name'];
+								echo "success"."-".$userName;
+							}
 						}
 					}
 				}
