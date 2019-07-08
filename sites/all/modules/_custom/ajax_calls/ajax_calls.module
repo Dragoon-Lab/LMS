@@ -55,7 +55,6 @@ function ajax_create_folder_callback($form, &$form_state){
 					'folder_type' => ''.$type,
 					'class_code' => ''.$folder_class_id,
 					'current_status' => ''.$current_status,
-					'created_time' => NULL,
 				))->execute();
 		
 		if($insert_count != 1){
