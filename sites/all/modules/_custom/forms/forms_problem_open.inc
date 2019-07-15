@@ -98,6 +98,18 @@ function problem_form($form, &$form_state){
 		'#prefix' => '<div id="gs_checkbox_container" class="element-hide">',
 		'#suffix' => '</div>'
 	);
+	$form['su'] = array(
+		'#type' => 'hidden',
+		'#value' => 'off',
+	);
+	$form['su_checkbox'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Skip Units'),
+		'#id' => 'su_checkbox',
+		'#prefix' => '<div id="su_checkbox_container" class="element-hide">',
+		'#suffix' => '</div>'
+	);
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Open Problem'),
