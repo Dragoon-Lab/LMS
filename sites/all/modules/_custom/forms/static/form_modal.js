@@ -21,6 +21,8 @@ jQuery(document).ready(function($) {
 		if(tutor == "topo"){
 			enableGiveParams(true);
 			enableGiveSchemas(true);
+			enableSkipUnits(true);
+			setDefaults(true);
 		}
 		//model library problems should not have group "g" set, so remove the element from the form
 		//same applies to "f" which depicts group(folder) incase of topomath
@@ -93,6 +95,26 @@ jQuery(document).ready(function($) {
 		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
 		$('#gs_checkbox').prop('checked',false);
 		form['gs'].value = "off";
+	}
+
+	var enableSkipUnits = function(/* status */ status){
+		if(status){
+			$('#su_checkbox_container').show();
+		}
+		else{
+			$('#su_checkbox_container').hide();
+		}
+		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
+		$('#su_checkbox').prop('checked',false);
+		form['su'].value = "off";
+	}
+
+	var setDefaults = function(/* status */ status){
+		//make default changes to flags, this is dynamic and can change, enabling skip units and give params for topomath for summer
+		$('#su_checkbox').prop('checked',status);
+		form['su'].value =  status == true ? "on": "false";
+		$('#gp_checkbox').prop('checked',status);
+		form['gp'].value = status == true ? "on": "false";
 	}
 
 	var submitProblemsForm = function(){
@@ -217,6 +239,8 @@ jQuery(document).ready(function($) {
 		if(tutor == "topo"){
 			enableGiveParams(false);
 			enableGiveSchemas(false);
+			enableSkipUnits(false);
+			setDefaults(false);
 		}
 		// add "g" to the form as the public library models wont have a g in the form them selves, g indicates group
 		//check if g is defined already and remove it from form before appending a new value
@@ -257,6 +281,8 @@ jQuery(document).ready(function($) {
 			if(tutor == "topo"){
 				enableGiveParams(false);
 				enableGiveSchemas(false);
+				enableSkipUnits(false);
+				setDefaults(false);
 			}
 		}
 		else{
@@ -265,6 +291,8 @@ jQuery(document).ready(function($) {
 			if(tutor == "topo"){
 				enableGiveParams(true);
 				enableGiveSchemas(true);
+				enableSkipUnits(true);
+				setDefaults(true);
 			}
 		}
 
@@ -299,6 +327,13 @@ jQuery(document).ready(function($) {
 			form["gp"].value = 'on';
 		else
 			form["gp"].value = 'off';
+	});
+	$('#su_checkbox').change(function(){
+		var checked = $("input[name='su_checkbox']:checked").val();
+		if(checked)
+			form["su"].value = 'on';
+		else
+			form["su"].value = 'off';
 	});
 
 });
