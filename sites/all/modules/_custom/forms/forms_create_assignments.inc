@@ -144,7 +144,10 @@ function create_assignment_form_submit($form, &$form_state){
 	unset($params['form_token']);
 	unset($params['form_id']);
 	unset($params['op']);
-	unset($params['ln_checkbox']);
+	$params['su'] = $params['su_checkbox'] ? "on" : "off";
+	$params['gp'] = $params['gp_checkbox'] ? "on" : "off";
+	$params['ln'] = $params['ln_checkbox'] ? "on" : "off";
+	$params['gs'] = $params['gs_checkbox'] ? "on" : "off";
 	$params['p'] = $form_state['values']['aname'];
 	echo $form_state['values']['pname'];
 	$params = json_encode($params);

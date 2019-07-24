@@ -92,7 +92,6 @@ jQuery(document).ready(function($) {
 		}
 		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
 		$('#ln_checkbox').prop('checked',false);
-		form['fp'].value = "off";
 	}
 
 	var enableGiveParams = function(/* status */ status){
@@ -104,7 +103,6 @@ jQuery(document).ready(function($) {
 		}
 		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
 		$('#gp_checkbox').prop('checked',false);
-		form['gp'].value = "off";
 	}
 
 	var enableGiveSchemas = function(/* status */ status){
@@ -116,7 +114,6 @@ jQuery(document).ready(function($) {
 		}
 		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
 		$('#gs_checkbox').prop('checked',false);
-		form['gs'].value = "off";
 	}
 
 	var enableSkipUnits = function(/* status */ status){
@@ -128,15 +125,12 @@ jQuery(document).ready(function($) {
 		}
 		//by default each time lock nodes is enabled or disabled, uncheck the box and also set form fp value to off
 		$('#su_checkbox').prop('checked',false);
-		form['su'].value = "off";
 	}
 
 	var setDefaults = function(/* status */ status){
 		//make default changes to flags, this is dynamic and can change, enabling skip units and give params for topomath for summer
 		$('#su_checkbox').prop('checked',status);
-		form['su'].value =  status == true ? "on": "false";
 		$('#gp_checkbox').prop('checked',status);
-		form['gp'].value = status == true ? "on": "false";
 	}
 
 	var updateSystemDescriptions = function(){
@@ -174,36 +168,6 @@ jQuery(document).ready(function($) {
 			});
 		}
 	}
-
-	$('#ln_checkbox').change(function(){
-		var checked = $("input[name='ln_checkbox']:checked").val();
-		if(checked)
-			form["fp"].value = 'on';
-		else
-			form["fp"].value = 'off';
-	});
-
-	$('#gs_checkbox').change(function(){
-		var checked = $("input[name='gs_checkbox']:checked").val();
-		if(checked)
-			form["gs"].value = 'on';
-		else
-			form["gs"].value = 'off';
-	});
-	$('#gp_checkbox').change(function(){
-		var checked = $("input[name='gp_checkbox']:checked").val();
-		if(checked)
-			form["gp"].value = 'on';
-		else
-			form["gp"].value = 'off';
-	});
-	$('#su_checkbox').change(function(){
-		var checked = $("input[name='su_checkbox']:checked").val();
-		if(checked)
-			form["su"].value = 'on';
-		else
-			form["su"].value = 'off';
-	});
 
 	$('#form_open_radios').change(function(){
 		var mode_val = $("input[type='radio'][name='m']:checked").val();
