@@ -104,6 +104,10 @@ function class_assignments_handle_assignment($code){
 				$sec = $props["s"];
 				$is = $props["is"];
 				$fp = $props["fp"];
+				$gs = $props["gs"];
+				$gp = $props["gp"];
+				$ln = $props["ln"];
+				$su = $props["su"];
 				$addGroup = "";
 				if(isset($props["g"]) && $props["g"] != ""){
 					$grp = $props["g"];
@@ -119,7 +123,12 @@ function class_assignments_handle_assignment($code){
 								<input type='hidden' name='sm' value='$sm'>
 								<input type='hidden' name='s' value='$sec'>
 								<input type='hidden' name='fp' value='$fp'>
-								<input type='hidden' name='is' value='$is'>".
+								<input type='hidden' name='is' value='$is'>
+								<input type='hidden' name='gs' value='$gs'>
+								<input type='hidden' name='gp' value='$gp'>
+								<input type='hidden' name='su' value='$su'>
+								<input type='hidden' name='ln' value='$ln'>
+								".
 								$addGroup."
 							</form>";
 									//retrieve the sd 
