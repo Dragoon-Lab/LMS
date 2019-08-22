@@ -245,12 +245,33 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 				$folder_id = $_REQUEST["folder_id"];
 				$user_name = $_REQUEST["user"];
 				//echo $folder_id.",".$user_name;
-				$mul_cond = db_and()->condition('folder_id',$folder_id)->condition('member_name',$user_name)->condition('member_relation',0);
-				$query = db_select('shared_members','sh')
-						->fields('sh',array('member_name'))
-						->condition($mul_cond)->execute();
-				$count = $query->rowCount();
-				echo $count;
+			 	$res_count=0;
+				$uquery = db_select('users','u')
+						->fields('u',array('uid'))
+						->condition('name',$user_name)
+						->execute();
+				$userCount = $uquery->rowCount();
+				if($userCount>0){
+					$udet = $uquery->fetchAssoc();
+					$userid= $udet['uid'];
+				
+					$fol_num_q =  db_select('folders','fo')
+							->fields('fo',array('folder_num'))
+							->condition('folder_id', $folder_id)
+							->execute();
+					$fol_row_count = $fol_num_q->rowCount();
+					if($fol_row_count > 0){
+						$fol_det = $fol_num_q->fetchAssoc();
+						$folder_num = $fol_det['folder_num'];
+				
+						$mul_cond = db_and()->condition('folder_num',$folder_num)->condition('uid',$userid)->condition('member_relation',0);
+						$res_query = db_select('shared_members','sh')
+								->fields('sh',array('shared_id'))
+								->condition($mul_cond)->execute();
+						$res_count = $res_query->rowCount();
+					}
+				}
+				echo $res_count;
 				//echo "count is".$count;
 				break;
 
