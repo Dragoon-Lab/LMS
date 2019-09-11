@@ -193,6 +193,37 @@ jQuery(document).ready(function($) {
         });
     });
 
+    $('#leaveFolder').on("click", function(e){
+        e.preventDefault();
+        //replace message with custom
+        var usFolSel = $("#others_folder_list").find(":selected").text();
+        $('#confirmFolderUnshare .modal-body').html('<p>Are you sure you want to leave folder</p> '+ usFolSel + " ?");
+        $('#confirmFolderUnshare').modal('show');
+        $('#unshareConfirmed').click(function(){
+            var form = document.forms['dragoon_nc_manageSharing'];
+            //console.log(form["select_folder"].value,$(current_glyph).closest('tr').find('td span:first').text());
+
+            $.ajax({
+                type: "POST",
+                url: "sites/all/modules/_custom/NC_models/static/nonClassUpdates.php",
+                data: {
+                    "req_type": "unshareFolder",
+                    "folder_id": form["select_others_folder"].value,
+                    "user_id": form["selfId"].value
+                },
+                success: function (data) {
+                    console.log(data);
+                    location.reload();
+                },
+                error: function (data) {
+                    console.error("delete failed");
+                }
+
+            });
+
+        });
+    });
+
     $('#shareDone').click(function(){
         location.reload();
     })

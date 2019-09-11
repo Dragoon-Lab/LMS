@@ -144,7 +144,7 @@ function forms_block_view($delta = ''){
 			module_load_include('inc', 'forms', 'forms_nc_manage_sharing');
 			//drupal_add_js(drupal_get_path('module', 'forms').'/static/nc_manage_sharing.js');
 			$form = drupal_get_form('forms_nc_sharing');
-			$block_form['title'] = t('Share Folders');
+			$block_form['title'] = t('Manage Sharing');
 			//$block_form['content'] = drupal_get_form('forms_nc_sharing');
 			$block_form['content'] = array(
 				'#markup' => drupal_render($form),
