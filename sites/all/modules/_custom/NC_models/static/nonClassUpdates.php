@@ -213,6 +213,25 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 					echo "fail";
 				break;
 
+			case "unshareFolder":
+				$folder_id = $_REQUEST["folder_id"];
+				$uid = $_REQUEST["user_id"];
+				//get Fol Num
+				$fol_num_q =  db_select('folders','fo')
+						->fields('fo',array('folder_num'))
+						->condition('folder_id', $folder_id)
+						->execute();
+				$fol_row_count = $fol_num_q->rowCount();
+				if($fol_row_count > 0){
+					$fol_det = $fol_num_q->fetchAssoc();
+					$folder_num = $fol_det['folder_num'];
+					$cond = db_and()->condition('folder_num',$folder_num)->condition('uid',$uid);
+					$unshareQ = db_delete('shared_members')
+						->condition($cond)
+						->execute();
+				}
+				break;
+
 			case "getUserList":
 				$folder_id = $_REQUEST["folder_id"];
 				$fol_num_q =  db_select('folders','fo')

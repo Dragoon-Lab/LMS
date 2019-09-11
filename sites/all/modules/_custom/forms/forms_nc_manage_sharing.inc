@@ -14,6 +14,14 @@ function forms_nc_sharing($form, &$form_state){
 	$user_det = array('uid' => $user->uid, 'uname' => $user->name);
 	$user_folders = loadUserFolders($user_det);
 	unset($user_folders[$name . "-private"]);
+	$form['Major_header'] = array(
+		'#markup' => '<ul class="nav nav-tabs">
+  						<li class="active"><a data-toggle="tab" href="#shMyFolder">Share My Folder</a></li>
+  						<li><a data-toggle="tab" href="#lvShFolder">Leave Shared Folder</a></li>
+					</ul>
+					<div class="tab-content">
+						<div id="shMyFolder" class="tab-pane fade in active">',
+	);
 	$form['select_folder'] = array(
 		//pump folder options including the user personal folder
 		'#type' => 'select',
@@ -53,11 +61,48 @@ function forms_nc_sharing($form, &$form_state){
 		'#type' => "hidden",
 		"#value" => $user_mail
 	);
+	$form['selfId'] = array(
+		'#type' => "hidden",
+		'#value' => $user->uid
+	);
+	//Get All Folders shared with user
+	$sharedWithUserList = loadOthersSharedFolders($user_det);
+	$form['second_tab'] = array(
+		'#markup' => '</div><div id="lvShFolder" class="tab-pane fade">
+  						',
+	);
+	if(sizeof($sharedWithUserList) > 0){
+		$form['select_others_folder'] = array(
+			//pump folder options including the user personal folder
+			'#type' => 'select',
+			'#options' => $sharedWithUserList,
+			"#id" => 'others_folder_list'
+		);
+
+		$form['leave_button'] = array(
+			'#type' => 'button',
+			'#value' => 'Leave Folder',
+			'#id' => 'leaveFolder'
+		);
+	}
+	else{
+		$form['empty_shared_list_message'] = array(
+			//Write a message to indicate no folders are shared
+			'#markup' => 'Nobody has shared a folder with you yet'
+		);
+	}
+	
+	$form['end_second_tab'] = array(
+		'#markup' => '</div>',
+	);
+
+
 	$form['submit_button'] = array(
 		'#type' => 'submit',
 		'#value' => t('Done'),
 		'#id' => 'shareDone'
 	);
+
 
 	return $form;
 }

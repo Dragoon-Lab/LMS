@@ -141,10 +141,10 @@
 												<h4 class="modal-title">Confirm Delete</h4>
 											</div>
 										<div class="modal-body">
-											<p>Are you sure you want to delete?</p>
+											<p>Are you sure you want to stop sharing the folder with ?</p><span id="targetUserUnshare"></span>
 										</div>
 										<div class="modal-footer">
-											<button type="button" class="btn btn-default" data-dismiss="modal" id="removeShareConfirmed">Yes! Delete</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="removeShareConfirmed">Yes! Unshare</button>
 											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
 										</div>
 									</div>
@@ -163,6 +163,23 @@
 										</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-default" data-dismiss="modal" id="copyModelConfirmed">Yes</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div id="confirmFolderUnshare" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Confirm Folder Unshare</h4>
+											</div>
+										<div class="modal-body">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="unshareConfirmed">Yes! Unshare</button>
 											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
 										</div>
 									</div>
@@ -278,6 +295,36 @@
 			$shared_holders = $shared_holders.$element;
 		}
 		return $shared_holders;
+	}
+
+	function loadOthersSharedFolders($user_det){
+		$user_id = $user_det['uid'];
+		$query2 = db_select('shared_members','sh');
+		$query2->fields('sh',array('folder_num'));
+		$mul_cond = db_and()->condition('uid', $user_id)->condition('member_relation',0);
+		$query2->condition($mul_cond);
+		$q_res2 = $query2->execute();
+		$ret_array = array();
+		while($res2 = $q_res2->fetchAssoc()){
+			$fol_num = $res2['folder_num'];
+			$get_fol_id = db_select('folders','f');
+			$get_fol_id->fields('f',array('folder_id','folder_name', 'uid'));
+			$get_fol_id->condition('folder_num',$fol_num);
+			$get_fol_id_res = $get_fol_id->execute();
+			$fol_id = $get_fol_id_res->fetchAssoc();
+			$folder_id = $fol_id['folder_id'];
+			$folder_name = $fol_id['folder_name'];
+			$uid = $fol_id['uid'];
+			//get user name
+			$user_q = db_select('users','u');
+			$user_q->fields('u', array('name'));
+			$user_q->condition('uid', $uid);
+			$user_q_res = $user_q->execute();
+			$user_name_det = $user_q_res->fetchAssoc();
+			$user_name = $user_name_det['name'];
+			$ret_array[$folder_id] = $folder_name." by ".$user_name;  
+		}
+		return $ret_array;
 	}
 
 
