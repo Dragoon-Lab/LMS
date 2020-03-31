@@ -44,6 +44,10 @@ function class_assignments_render_page($class){
 		'module' => 'class_assignments',
 		'delta' => 'assignment_links'
 	));
+	$import_assignments_html = get_block_html(array(
+		'module' => 'class_assignments',
+		'delta' => 'import_assignments'
+	));
 	$model_library_html = get_block_html(array(
 		'module' => 'model_library',
 		'delta' => 'published_problems'
@@ -57,7 +61,7 @@ function class_assignments_render_page($class){
 				<input type = 'hidden' id = 'userName' value = '$user->name'></input>
 				<input type = 'hidden' id = 'code' value = '".$class['code']."'></input>";
 	$html = '<h2>'.t($class['name']).'</h2>'.$fields.$text;
-	$html .= $enrolled_users_html.$assignment_links_html.$model_library_html.$non_class_models_html;
+	$html .= $enrolled_users_html.$assignment_links_html.$import_assignments_html.$model_library_html.$non_class_models_html;
 	return $html;
 }
 
@@ -264,6 +268,34 @@ function class_assignments_block_view($delta = ''){
 				//'#attached' => array(
 				//	'css' => array($path.'/static/table.css')
 				//)
+			);
+			break;
+		case 'import_assignments':
+			$block['title'] = t('Import problems from another class');
+			$block['content'] = array(
+				'#markup' => '<div id="import_assignments_block"><input type="button" class="btn btn-success btn-md" value="Import Problems" id="import_assignments_btn"></div>
+
+					<div id="importAssignmentsModal" class="modal fade" role="dialog">
+								<div class="modal-dialog">
+								<!-- Modal content-->
+									<div class="modal-content">
+										<div class="modal-header">
+											<button type="button" class="close" data-dismiss="modal">&times;</button>
+												<h4 class="modal-title">Import problems and models from another class</h4>
+											</div>
+										<div class="modal-body">
+											<div><p>Enter the class code of the class to import.Problems will be copied into this class. Copies of models will be added to a new folder in your private folder if you wish to modify them.Note that this operation cannot be undone.</p></div>
+											<div><b>Class Code:</b><input type="text" name="source_class_code" maxlength="4" id="importAssign_source_class">
+												<span id="class_code_error_dp"></span>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-success" data-dismiss="modal" id="import_assignments_btn_2">Import</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal" href="#deleteFolderModal">Cancel</button>
+										</div>
+									</div>
+								</div>
+							</div>',
 			);
 			break;
 	}
