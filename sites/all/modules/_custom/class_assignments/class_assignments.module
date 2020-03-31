@@ -233,6 +233,10 @@ function class_assignments_block_info(){
 		'info' => 'Table of students enrolled in a class',
 		'cache' => DRUPAL_NO_CACHE
 	);
+	$blocks['import_assignments_modal'] = array(
+		'info' => 'Form to import assignments from other teacher classes',
+		'cache' => DRUPAL_NO_CACHE
+	);
 
 	return $blocks;
 }
@@ -241,6 +245,7 @@ function class_assignments_block_view($delta = ''){
 	$block = array();
 	global $user;
 	$path = drupal_get_path('modules', 'table');
+	$self_path = drupal_get_path('module', 'class_assignments');
 
 	switch($delta){
 		case 'assignment_links':
@@ -273,29 +278,20 @@ function class_assignments_block_view($delta = ''){
 		case 'import_assignments':
 			$block['title'] = t('Import problems from another class');
 			$block['content'] = array(
-				'#markup' => '<div id="import_assignments_block"><input type="button" class="btn btn-success btn-md" value="Import Problems" id="import_assignments_btn"></div>
-
-					<div id="importAssignmentsModal" class="modal fade" role="dialog">
-								<div class="modal-dialog">
-								<!-- Modal content-->
-									<div class="modal-content">
-										<div class="modal-header">
-											<button type="button" class="close" data-dismiss="modal">&times;</button>
-												<h4 class="modal-title">Import problems and models from another class</h4>
-											</div>
-										<div class="modal-body">
-											<div><p>Enter the class code of the class to import.Problems will be copied into this class. Copies of models will be added to a new folder in your private folder if you wish to modify them.Note that this operation cannot be undone.</p></div>
-											<div><b>Class Code:</b><input type="text" name="source_class_code" maxlength="4" id="importAssign_source_class">
-												<span id="class_code_error_dp"></span>
-											</div>
-										</div>
-										<div class="modal-footer">
-											<button type="button" class="btn btn-success" data-dismiss="modal" id="import_assignments_btn_2">Import</button>
-											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal" href="#deleteFolderModal">Cancel</button>
-										</div>
-									</div>
-								</div>
-							</div>',
+				'#markup' => '<div id="import_assignments_block"><input type="button" class="btn btn-success btn-md" value="Import Problems" id="import_assignments_btn"></div>'
+			);
+			break;
+		case 'import_assignments_modal':
+			module_load_include('inc', 'class_assignments', 'class_assignments_import_assignments');
+			$form = drupal_get_form('class_import_assignments_form');
+			$block['title'] = t("Import problems and models from another class");
+			$block['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array($self_path.'/static/import_assignments.js')
+				),
+				'#prefix' => "<div id='importAssignmentsModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
 			);
 			break;
 	}
