@@ -379,7 +379,8 @@ function ajax_import_assignments_callback($form, &$form_state){
 		else{
 			//legit case, initiate transfer
 			$assign_list_ar = db_select('assignments','a')->fields('a',array('problem','problem_properties'))->condition('class_code', $inp_code)->execute();
-			$count=0;
+			$failedProblemCopies = 0;
+			$failedNonClassCopies = 0;
 			while($assign_list = $assign_list_ar->fetchAssoc()){
 
 				//$assign_list = $assign_list_ar->fetchAssoc();
@@ -402,17 +403,45 @@ function ajax_import_assignments_callback($form, &$form_state){
 				$src = isset($props["g"]) ? $props["g"] : "";
 				$sec = isset($props["s"]) ? $props["s"] : "";
 				global $user;
-				$dest = "copy".$sec."-".$user->name;
+				$dest = $user->name."-private";
 				$copy_res1 = copy_assignment_models($src,$dest,$new_problem_name,$user->name,$sec);
 				if(trim($copy_res1) != "success"){
-					return "".$copy_res1;
-					$count++;
+					$failedProblemCopies++;
 				}
-				else
-				$count++;
+				else{
+					//success, initiate an assignment creation
+					$new_problem_props_ar = $props;
+					$new_problem_props_ar["p"] = $new_problem_name;
+					$get_class_name = db_select("classes","c")->fields("c",array('section'))->condition('code', $user_class)->execute();
+					$get_class_name = $get_class_name->fetchAssoc();
+					$class_section = $get_class_name["section"];
+					$new_problem_props_ar["s"] = $class_section;
+					$new_problem_props_ar["g"] = $user->name."-"."private";
+					$new_problems_props_str = json_encode(($new_problem_props_ar));
+					global $user;
+					$create_Assign = db_insert("assignments")
+										->fields(array(
+											'class_code' => ''.$user_class,
+											'problem' => ''.$new_problem_name,
+											'problem_properties'=> ''.$new_problems_props_str,
+											'assignment_name'=> ''.$new_problem_name,
+											'assignment_id'=> ''.get_assignment_id(12)
+										))->execute();
+					//success, initiate a folder copy
+					$sec2 = "non-class-models";
+					$dest2 = "AssignmentCopies-".$user->name;
+					$copy_res2 = copy_assignment_models($src, $dest, $new_problem_name, $user->name, $sec2);
+					if(trim($copy_res2) != "success")
+						$failedNonClassCopies++;
+					else{
+						//success, initiate a assignment copy
+
+					}
+				}
+				
 				//return $ret_msg;
 			}
-			return "here".$count;
+			return "failed". $failedProblemCopies. $failedNonClassCopies;
 		}
 	}
 
@@ -420,7 +449,7 @@ function ajax_import_assignments_callback($form, &$form_state){
 		//Something went wrong with select query
 		$ret_dat['exception'] = true;
 		watchdog_exception('folder_dup_check', $e);
-		return "<b>Something went wrong, please refresh the page and try again or contact your site admin</b>";
+		return "<b>Something went wrong, please refresh the page and try again or contact your site admin</b>".$e;
 	}
 }
 
@@ -446,4 +475,16 @@ function copy_assignment_models($src, $dest, $prob, $user, $sec){
 	$context  = stream_context_create($options);
 	$result = file_get_contents($url, false, $context);
 	return $result;
+}
+
+function get_assignment_id($size = 4){
+	//$size = 4;
+	$code = '';
+	$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	srand(time() + rand(1,999));
+	for($index = 0; $index < $size; $index++){
+		$code .= substr($characters, rand()%62, 1); 
+	}
+
+	return $code;
 }
