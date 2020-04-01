@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
 		var cur_url = window.location.href;
 		cur_class = cur_url.split("class/");
 		cur_class = cur_class[1].trim();
-		var isDuplicate = code == cur_class ? true : false;
+		var isDuplicate = code.toUpperCase() === cur_class.toUpperCase() ? true : false;
 		if(isDuplicate){
 			return {
 				valid: false,
@@ -48,16 +48,6 @@ jQuery(document).ready(function($) {
 			}
 		}
 
-		//class exist checks
-		var classExists = false;
-		
-		var copySuccesful = false;
-		//write  a back end
-		if(classExists && copySuccesful){
-			return {
-				valid: true,	
-			}
-		}
 		return {valid: true};
 	}
 });
