@@ -433,15 +433,20 @@ function ajax_import_assignments_callback($form, &$form_state){
 					$copy_res2 = copy_assignment_models($src, $dest2, $new_problem_name, $user->name, $sec2);
 					if(trim($copy_res2) != "success")
 						$failedNonClassCopies++;
-					else{
-						//success, initiate a assignment copy
-
-					}
 				}
 				
 				//return $ret_msg;
 			}
-			return "failed". $failedProblemCopies. $failedNonClassCopies;
+			if($failedProblemCopies == 0 && $failedNonClassCopies ==0){
+				$commands[] = ajax_command_html('#block-class-assignments-import-assignments-modal', "Import successful, page will reload in few seconds");
+				$commands[] = array('command' => 'reloadPage');
+				return array('#type' => 'ajax', '#commands' => $commands);
+			}
+			else{
+				$commands[] = ajax_command_html('#block-class-assignments-import-assignments-modal', "Import failed, please try again, page will reload in few seconds");
+				$commands[] = array('command' => 'reloadPage');
+				return array('#type' => 'ajax', '#commands' => $commands);
+			}
 		}
 	}
 

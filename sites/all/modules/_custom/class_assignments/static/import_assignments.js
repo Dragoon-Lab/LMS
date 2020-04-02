@@ -50,4 +50,10 @@ jQuery(document).ready(function($) {
 
 		return {valid: true};
 	}
+	Drupal.ajax.prototype.commands.reloadPage = function(){
+		//Print success message and reload page
+		setTimeout(function(){
+			location.reload();
+		},2000);
+	} 
 });
