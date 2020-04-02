@@ -400,8 +400,11 @@ function ajax_import_assignments_callback($form, &$form_state){
 					}					
 				}
 				$props = json_decode($problem_props, true);
+				$get_class_name = db_select("classes","c")->fields("c",array('section'))->condition('code', $user_class)->execute();
+				$get_class_name = $get_class_name->fetchAssoc();
+				$class_section = $get_class_name["section"];
 				$src = isset($props["g"]) ? $props["g"] : "";
-				$sec = isset($props["s"]) ? $props["s"] : "";
+				$sec = $class_section;
 				global $user;
 				$dest = $user->name."-private";
 				$copy_res1 = copy_assignment_models($src,$dest,$new_problem_name,$user->name,$sec);
@@ -412,9 +415,6 @@ function ajax_import_assignments_callback($form, &$form_state){
 					//success, initiate an assignment creation
 					$new_problem_props_ar = $props;
 					$new_problem_props_ar["p"] = $new_problem_name;
-					$get_class_name = db_select("classes","c")->fields("c",array('section'))->condition('code', $user_class)->execute();
-					$get_class_name = $get_class_name->fetchAssoc();
-					$class_section = $get_class_name["section"];
 					$new_problem_props_ar["s"] = $class_section;
 					$new_problem_props_ar["g"] = $user->name."-"."private";
 					$new_problems_props_str = json_encode(($new_problem_props_ar));
@@ -430,7 +430,7 @@ function ajax_import_assignments_callback($form, &$form_state){
 					//success, initiate a folder copy
 					$sec2 = "non-class-models";
 					$dest2 = "AssignmentCopies-".$user->name;
-					$copy_res2 = copy_assignment_models($src, $dest, $new_problem_name, $user->name, $sec2);
+					$copy_res2 = copy_assignment_models($src, $dest2, $new_problem_name, $user->name, $sec2);
 					if(trim($copy_res2) != "success")
 						$failedNonClassCopies++;
 					else{
