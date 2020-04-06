@@ -7,32 +7,26 @@ function create_assignment_form($form, &$form_state){
 		'#maxlength' => 50,
 		'#description' => t('Enter name of the assignment, so that you can remember the assignment.'),
 	);
-
 	$form['problem'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Problem'),
 		'#disabled' => TRUE,
 	);
-
 	$form['pname'] = array(
 		'#type' => 'hidden'
 	);
-
 	$form['cc'] = array(
 		'#type' => 'hidden',
 	);
-
 	$form['m'] = array(
 		'#id' => 'form_open_radios',
 		'#type' => 'radios',
 		'#required' => TRUE,
 	);
-
 	$mode_options = get_create_assignment_options();
 	foreach($mode_options as $option => $value){
 		$form['m'][$option] = $value;
 	}
-
 	if(has_system_descriptions()){
 		$form['sd'] = array(
 			'#id' => 'assignment_def_sd',
@@ -41,39 +35,31 @@ function create_assignment_form($form, &$form_state){
 			'#title' => t('Choose System description'),
 		);
 	}
-
 	$form['p'] = array(
 		'#type' => 'hidden',
 	);
-
 	$form['sm'] = array(
 		'#type' => 'hidden',
 		'#value' => 'feedback',
 	);
-
 	$form['is'] = array(
 		'#type' => 'hidden',
 		'#value' => 'algebraic',
 	);
-
 	$form['s'] = array(
 		'#type' => 'hidden',
 	);
-
 	$form['create_session'] = array(
 		'#type' => 'hidden',
 		'#value' => 'FALSE',
 	);
-
 	$form['g'] = array(
 		'#type' => 'hidden',
 	);
-
 	$form['fp'] = array(
 		'#type' => 'hidden',
 		'#default_value' => 'off',
 	);
-
 	$form['ln_checkbox'] = array(
 		'#type' => 'checkbox',
 		'#title' => t('Lock Nodes'),

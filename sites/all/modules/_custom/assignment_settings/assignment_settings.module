@@ -1,0 +1,27 @@
+<?php
+function assignment_settings_block_info(){
+	$blocks = array();
+	$blocks['input_assignment_settings'] = array(
+		'info' => 'Teachers modify their assignment settings here'
+	);
+	return $blocks;
+}
+
+function assignment_settings_block_view($delta = ''){
+	$block = array();
+	switch($delta){
+		case 'input_assignment_settings':
+			module_load_include('inc', 'assignment_settings', 'user_assignment_reset_form');
+			$form = drupal_get_form('user_assignment_reset_form');
+			$block['content'] = array(
+				'#markup' => drupal_render($form),
+			);
+			break;
+	}
+
+	return $block;
+
+}
+
+
+

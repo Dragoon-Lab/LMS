@@ -29,6 +29,7 @@ function model_library_block_view($delta = ""){
 				'otherTags' => 'class = "dragoon_problem" data-toggle = "modal" data-target = "#dragoon_problem_wrapper"',
 			);
 			$dragoon_path = get_path();
+			ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 6.0)'); 
 			$json = file_get_contents($dragoon_path['url'].'/public_problem_index.json');
 			//$json = file_get_contents((array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on'?"https":"http")."://".$_SERVER['SERVER_NAME'].'/code/public_problem_index.json');
 			$block['content'] = array(

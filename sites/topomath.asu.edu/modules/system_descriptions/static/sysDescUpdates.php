@@ -97,7 +97,7 @@ function take_action($case=" "){
 			if($query){
 				echo "success";
 				//delete the file in uploads directory
-				unlink("../uploads/".$path);
+				unlink("/dragoon/lms/topomath-sysdesc-uploads/".$path);
 			}else
 				echo "fail";
 			break;	
