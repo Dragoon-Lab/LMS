@@ -169,35 +169,6 @@ jQuery(document).ready(function($) {
 		}
 	}
 
-	$('#ln_checkbox').change(function(){
-		var checked = $("input[name='ln_checkbox']:checked").val();
-		if(checked)
-			form["fp"].value = 'on';
-		else
-			form["fp"].value = 'off';
-	});
-
-	$('#gs_checkbox').change(function(){
-		var checked = $("input[name='gs_checkbox']:checked").val();
-		if(checked)
-			form["gs"].value = 'on';
-		else
-			form["gs"].value = 'off';
-	});
-	$('#gp_checkbox').change(function(){
-		var checked = $("input[name='gp_checkbox']:checked").val();
-		if(checked)
-			form["gp"].value = 'on';
-		else
-			form["gp"].value = 'off';
-	});
-	$('#su_checkbox').change(function(){
-		var checked = $("input[name='su_checkbox']:checked").val();
-		if(checked)
-			form["su"].value = 'on';
-		else
-			form["su"].value = 'off';
-	});
 	$('#form_open_radios').change(function(){
 		var mode_val = $("input[type='radio'][name='m']:checked").val();
 		var mode_val_ar = mode_val.split("|");
