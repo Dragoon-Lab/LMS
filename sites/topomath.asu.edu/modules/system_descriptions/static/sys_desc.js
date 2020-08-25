@@ -1,5 +1,5 @@
 jQuery(document).ready(function($){
-	var upload_dir = '/dragoon/lms/topomath-sysdesc-uploads/';
+	var upload_dir = 'sites/topomath.asu.edu/modules/system_descriptions/uploads/';
 	var cke_path = "/?q=sysdescs";
 	var sd_update_handler = "sites/topomath.asu.edu/modules/system_descriptions/static/sysDescUpdates.php";
 	//handle descriptions button

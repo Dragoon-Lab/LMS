@@ -44,6 +44,7 @@ function ajax_create_folder_callback($form, &$form_state){
 	$folder_class_id = $form_state['values']['class-id'];
 	//current status indicates if the folder is shared or not, for private
 	$current_status = $form_state['values']['sharing_status'];
+	$created_time = date("Y-m-d H:i:s");
 	try {
 		//db_insert function should be specified a return option for the count of rows inserted 
 		//will be returned (if not we use this option execute() returns auto inc field or undefined if the auto inc is not present)
@@ -54,6 +55,7 @@ function ajax_create_folder_callback($form, &$form_state){
 					'uid' => ''.$uid,
 					'folder_type' => ''.$type,
 					'class_code' => ''.$folder_class_id,
+					'created_time'=> ''.$created_time,
 					'current_status' => ''.$current_status,
 				))->execute();
 		
@@ -364,4 +366,132 @@ function rename_tutor_model($data){
 	$context  = stream_context_create($options);
 	$result = file_get_contents($url, false, $context);
 	return $result;
+}
+
+function ajax_import_assignments_callback($form, &$form_state){
+	$inp_code = isset($form_state['values']['input_class_code'])? $form_state['values']['input_class_code']: "";
+	$user_class_path = isset($form_state['values']['class_code_now'])? $form_state['values']['class_code_now']: "";
+	$user_class = explode("/", $user_class_path);
+	$user_class = $user_class[1];
+	try {
+		$row_count = db_select('assignments')->condition('class_code', $inp_code)->countQuery()->execute()->fetchField();
+		if($row_count==0){
+			return "<b>Invalid class code, please recheck your code</b>";
+		}
+		else{
+			//legit case, initiate transfer
+			$assign_list_ar = db_select('assignments','a')->fields('a',array('problem','problem_properties'))->condition('class_code', $inp_code)->execute();
+			$failedProblemCopies = 0;
+			$failedNonClassCopies = 0;
+			while($assign_list = $assign_list_ar->fetchAssoc()){
+
+				//$assign_list = $assign_list_ar->fetchAssoc();
+				$problem_name = $assign_list["problem"];
+				$problem_props = $assign_list["problem_properties"];
+				$problem_name_count = db_select('assignments')->condition('class_code', $user_class)->condition('problem',$problem_name)->countQuery()->execute()->fetchField();
+				$new_problem_name = $problem_name;
+				//if more than one problem exists with same name update the problem name
+				if($problem_name_count>0){
+					$npn = explode("_v",$problem_name);
+					if(isset($npn[1]) && is_numeric($npn[1])){
+						$suf_num = intval($npn[1]);
+						$new_problem_name = $problem_name."v".($suf_num++);
+					}
+					else{
+						$new_problem_name = $problem_name."v1";
+					}					
+				}
+				$props = json_decode($problem_props, true);
+				$get_class_name = db_select("classes","c")->fields("c",array('section'))->condition('code', $user_class)->execute();
+				$get_class_name = $get_class_name->fetchAssoc();
+				$class_section = $get_class_name["section"];
+				$src = isset($props["g"]) ? $props["g"] : "";
+				$sec = $class_section;
+				global $user;
+				$dest = $user->name."-private";
+				$copy_res1 = copy_assignment_models($src,$dest,$new_problem_name,$user->name,$sec);
+				if(trim($copy_res1) != "success"){
+					$failedProblemCopies++;
+				}
+				else{
+					//success, initiate an assignment creation
+					$new_problem_props_ar = $props;
+					$new_problem_props_ar["p"] = $new_problem_name;
+					$new_problem_props_ar["s"] = $class_section;
+					$new_problem_props_ar["g"] = $user->name."-"."private";
+					$new_problems_props_str = json_encode(($new_problem_props_ar));
+					global $user;
+					$create_Assign = db_insert("assignments")
+										->fields(array(
+											'class_code' => ''.$user_class,
+											'problem' => ''.$new_problem_name,
+											'problem_properties'=> ''.$new_problems_props_str,
+											'assignment_name'=> ''.$new_problem_name,
+											'assignment_id'=> ''.get_assignment_id(12)
+										))->execute();
+					//success, initiate a folder copy
+					$sec2 = "non-class-models";
+					$dest2 = "AssignmentCopies-".$user->name;
+					$copy_res2 = copy_assignment_models($src, $dest2, $new_problem_name, $user->name, $sec2);
+					if(trim($copy_res2) != "success")
+						$failedNonClassCopies++;
+				}
+				
+				//return $ret_msg;
+			}
+			if($failedProblemCopies == 0 && $failedNonClassCopies ==0){
+				$commands[] = ajax_command_html('#block-class-assignments-import-assignments-modal', "Import successful, page will reload in few seconds");
+				$commands[] = array('command' => 'reloadPage');
+				return array('#type' => 'ajax', '#commands' => $commands);
+			}
+			else{
+				$commands[] = ajax_command_html('#block-class-assignments-import-assignments-modal', "Import failed, please try again, page will reload in few seconds");
+				$commands[] = array('command' => 'reloadPage');
+				return array('#type' => 'ajax', '#commands' => $commands);
+			}
+		}
+	}
+
+	catch(Exception $e) {
+		//Something went wrong with select query
+		$ret_dat['exception'] = true;
+		watchdog_exception('folder_dup_check', $e);
+		return "<b>Something went wrong, please refresh the page and try again or contact your site admin</b>".$e;
+	}
+}
+
+function copy_assignment_models($src, $dest, $prob, $user, $sec){
+	$data = array(
+			't'=> 'modelAction', 
+			'action' => "copyModel",
+			'src' => $src,
+			'mod' => $prob,
+			'dest' => $dest,
+			'user' => $user,
+			'section' => $sec
+		);
+	$options = array(
+		'http' => array(
+			'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+			'method'  => 'POST',
+			'content' => http_build_query($data)
+		)
+	);
+	$url_ar = get_path();
+	$url = $url_ar['url'].'/global.php';
+	$context  = stream_context_create($options);
+	$result = file_get_contents($url, false, $context);
+	return $result;
+}
+
+function get_assignment_id($size = 4){
+	//$size = 4;
+	$code = '';
+	$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	srand(time() + rand(1,999));
+	for($index = 0; $index < $size; $index++){
+		$code .= substr($characters, rand()%62, 1); 
+	}
+
+	return $code;
 }

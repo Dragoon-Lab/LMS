@@ -8,7 +8,7 @@ if(isset($_GET['files']))
     $error = false;
     $files = array();
     $path = $_GET["path"];
-    $uploaddir = '/dragoon/lms/topomath-sysdesc-uploads/';
+    $uploaddir = '../uploads/';
     print_r($_FILES);
     foreach($_FILES as $file)
     {

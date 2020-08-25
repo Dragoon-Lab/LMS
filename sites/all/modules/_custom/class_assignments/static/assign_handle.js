@@ -70,4 +70,5 @@ jQuery(document).ready(function($) {
 	if(sd_path){
 		$('#messageReader').append("<br/>please check sd <a href='"+upload_dir+sd_path+"'>here</a>");
 	}
+
 });

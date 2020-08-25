@@ -44,6 +44,10 @@ function class_assignments_render_page($class){
 		'module' => 'class_assignments',
 		'delta' => 'assignment_links'
 	));
+	$import_assignments_html = get_block_html(array(
+		'module' => 'class_assignments',
+		'delta' => 'import_assignments'
+	));
 	$model_library_html = get_block_html(array(
 		'module' => 'model_library',
 		'delta' => 'published_problems'
@@ -57,7 +61,7 @@ function class_assignments_render_page($class){
 				<input type = 'hidden' id = 'userName' value = '$user->name'></input>
 				<input type = 'hidden' id = 'code' value = '".$class['code']."'></input>";
 	$html = '<h2>'.t($class['name']).'</h2>'.$fields.$text;
-	$html .= $enrolled_users_html.$assignment_links_html.$model_library_html.$non_class_models_html;
+	$html .= $enrolled_users_html.$assignment_links_html.$import_assignments_html.$model_library_html.$non_class_models_html;
 	return $html;
 }
 
@@ -229,6 +233,10 @@ function class_assignments_block_info(){
 		'info' => 'Table of students enrolled in a class',
 		'cache' => DRUPAL_NO_CACHE
 	);
+	$blocks['import_assignments_modal'] = array(
+		'info' => 'Form to import assignments from other teacher classes',
+		'cache' => DRUPAL_NO_CACHE
+	);
 
 	return $blocks;
 }
@@ -237,6 +245,7 @@ function class_assignments_block_view($delta = ''){
 	$block = array();
 	global $user;
 	$path = drupal_get_path('modules', 'table');
+	$self_path = drupal_get_path('module', 'class_assignments');
 
 	switch($delta){
 		case 'assignment_links':
@@ -264,6 +273,25 @@ function class_assignments_block_view($delta = ''){
 				//'#attached' => array(
 				//	'css' => array($path.'/static/table.css')
 				//)
+			);
+			break;
+		case 'import_assignments':
+			$block['title'] = t('Import problems from another class');
+			$block['content'] = array(
+				'#markup' => '<div id="import_assignments_block"><input type="button" class="btn btn-success btn-md" value="Import Problems" id="import_assignments_btn"></div>'
+			);
+			break;
+		case 'import_assignments_modal':
+			module_load_include('inc', 'class_assignments', 'class_assignments_import_assignments');
+			$form = drupal_get_form('class_import_assignments_form');
+			$block['title'] = t("Import problems and models from another class");
+			$block['content'] = array(
+				'#markup' => drupal_render($form),
+				'#attached' => array(
+					'js' => array($self_path.'/static/import_assignments.js')
+				),
+				'#prefix' => "<div id='importAssignmentsModal' class='modal fade' role='dialog'><div class='modal-dialog'><div class='modal-content'><div class = 'modal-body'><span class = 'close' data-dismiss = 'modal'>x</span>",
+				'#suffix' => "</div></div></div></div>"
 			);
 			break;
 	}

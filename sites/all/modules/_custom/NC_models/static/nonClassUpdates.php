@@ -339,8 +339,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 	}
 
 	function deleteModels($del_models,$del_folders){
-		$get_path_ar = get_path();
-                $url = $get_path_ar['url'].'/global.php';
+		$url = get_path()['url'].'/global.php';
 		$data = array('t' => 'deleteNonClassProblems', 'dm' => $del_models, 'df' => $del_folders);
 		$options = array(
 			'http' => array(

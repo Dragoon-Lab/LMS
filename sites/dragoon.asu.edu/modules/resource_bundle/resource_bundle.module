@@ -45,7 +45,7 @@ function get_create_assignment_options(){
 				'AUTHOR|construction' => t('Edit the model'),
 			),
 			'#title' => t('Select a method to start Dragoon problem'),
-			'#default_value' => 'AUTHOR|construction'
+			'#default_value' => 'COACHED|construction'
 		);
 	}
 
