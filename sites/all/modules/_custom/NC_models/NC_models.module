@@ -179,7 +179,7 @@
 										<div class="modal-body">
 										</div>
 										<div class="modal-footer">
-											<button type="button" class="btn btn-default" data-dismiss="modal" id="unshareConfirmed">Yes! Unshare</button>
+											<button type="button" class="btn btn-default" data-dismiss="modal" id="unshareConfirmed">Yes, leave folder!</button>
 											<button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal">Cancel</button>
 										</div>
 									</div>

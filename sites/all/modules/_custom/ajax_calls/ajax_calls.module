@@ -44,6 +44,7 @@ function ajax_create_folder_callback($form, &$form_state){
 	$folder_class_id = $form_state['values']['class-id'];
 	//current status indicates if the folder is shared or not, for private
 	$current_status = $form_state['values']['sharing_status'];
+	$created_time = date("Y-m-d H:i:s");
 	try {
 		//db_insert function should be specified a return option for the count of rows inserted 
 		//will be returned (if not we use this option execute() returns auto inc field or undefined if the auto inc is not present)
@@ -54,6 +55,7 @@ function ajax_create_folder_callback($form, &$form_state){
 					'uid' => ''.$uid,
 					'folder_type' => ''.$type,
 					'class_code' => ''.$folder_class_id,
+					'created_time'=> ''.$created_time,
 					'current_status' => ''.$current_status,
 				))->execute();
 		

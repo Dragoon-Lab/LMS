@@ -226,5 +226,8 @@ jQuery(document).ready(function($) {
 
     $('#shareDone').click(function(){
         location.reload();
-    })
+    });
+    $('#shareFolderModal').on('hidden.bs.modal', function(){
+        location.reload();
+    });
 });
