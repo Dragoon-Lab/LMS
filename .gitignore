@@ -44,9 +44,9 @@ sites/all/modules/*
 
 #Ignore custom theme folders except css files
 sites/dragoon.asu.edu/themes/*
-sites/topomath.asu.edu/themes/
-!sites/dragoon.asu.edu/themes/style.css
-!sites/topomath.asu.edu/themes/style.css
+sites/topomath.asu.edu/themes/*
+!sites/dragoon.asu.edu/themes/bootstrap/style.css
+!sites/topomath.asu.edu/themes/bootstrap/style.css
 
 #Ignore symlinks on server
 ET

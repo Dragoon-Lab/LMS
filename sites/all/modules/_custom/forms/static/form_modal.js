@@ -274,7 +274,7 @@ jQuery(document).ready(function($) {
 		var mode_val = $("input[type='radio'][name='m']:checked").val();
 		var mode_val_ar = mode_val.split("&");
 		var mode = mode_val_ar[0];
-		if(mode == "AUTHOR"){
+		if(mode == "AUTHOR" || mode == "SEDITOR"){
 			enableRestart(false);
 			enableLockNodes(false);
 			
@@ -295,7 +295,6 @@ jQuery(document).ready(function($) {
 				setDefaults(true);
 			}
 		}
-
 	});
 
 	$('#rp_checkbox').change(function(){

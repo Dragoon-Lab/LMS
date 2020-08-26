@@ -93,8 +93,8 @@ function problem_form($form, &$form_state){
 	$form['s'] = array(
 		'#type' => 'hidden',
 		'#value' => 'public-login',
-	);
-
+	)
+;
 	$form['rp'] = array(
 		'#type' => 'hidden',
 		'#value' => 'off',
@@ -107,12 +107,10 @@ function problem_form($form, &$form_state){
 		'#prefix' => '<div id="rp_checkbox_container" class="element-hide">',
 		'#suffix' => '</div>'
 	);
-
 	$form['fp'] = array(
 		'#type' => 'hidden',
 		'#value' => 'off',
 	);
-
 	$form['ln_checkbox'] = array(
 		'#type' => 'checkbox',
 		'#title' => t('Lock Nodes'),
