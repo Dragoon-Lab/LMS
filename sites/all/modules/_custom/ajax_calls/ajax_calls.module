@@ -409,16 +409,22 @@ function ajax_import_assignments_callback($form, &$form_state){
 				$sec = $class_section;
 				global $user;
 				$dest = $user->name."-private";
-				$copy_res1 = copy_assignment_models($src,$dest,$new_problem_name,$user->name,$sec);
+				if($src!= ""){
+					$copy_res1 = copy_assignment_models($src,$dest,$new_problem_name,$user->name,$sec);
+				}
+				else{
+					//In the case source is empty/NULL, do not copy assignment models because they could be pre defined problems which open without AUTHOR model
+					$copy_res1 = success;
+				}
 				if(trim($copy_res1) != "success"){
 					$failedProblemCopies++;
 				}
 				else{
 					//success, initiate an assignment creation
 					$new_problem_props_ar = $props;
-					$new_problem_props_ar["p"] = $new_problem_name;
+					$new_problem_props_ar["p"] = $src != "" ? $new_problem_name: $props["p"];
 					$new_problem_props_ar["s"] = $class_section;
-					$new_problem_props_ar["g"] = $user->name."-"."private";
+					$new_problem_props_ar["g"] = $src!= "" ? $user->name."-"."private": "";
 					$new_problems_props_str = json_encode(($new_problem_props_ar));
 					global $user;
 					$create_Assign = db_insert("assignments")
@@ -432,11 +438,13 @@ function ajax_import_assignments_callback($form, &$form_state){
 					//success, initiate a folder copy
 					$sec2 = "non-class-models";
 					$dest2 = "AssignmentCopies-".$user->name;
-					$copy_res2 = copy_assignment_models($src, $dest2, $new_problem_name, $user->name, $sec2);
+					if($src!="")
+						$copy_res2 = copy_assignment_models($src, $dest2, $new_problem_name, $user->name, $sec2);
+					else
+						$copy_res2 = "success";
 					if(trim($copy_res2) != "success")
 						$failedNonClassCopies++;
 				}
-				
 				//return $ret_msg;
 			}
 			if($failedProblemCopies == 0 && $failedNonClassCopies ==0){
@@ -461,6 +469,7 @@ function ajax_import_assignments_callback($form, &$form_state){
 }
 
 function copy_assignment_models($src, $dest, $prob, $user, $sec){
+	
 	$data = array(
 			't'=> 'modelAction', 
 			'action' => "copyModel",
